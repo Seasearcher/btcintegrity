@@ -75,9 +75,9 @@
 
       <!-- Sparkline -->
       <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
-        <path class="spark-area" fill="#fb7185" d="M0,30 L20,32 L40,28 L60,34 L80,30 L100,36 L120,33 L140,38 L160,35 L180,40 L200,38 L200,50 L0,50 Z"></path>
-        <path class="spark-path" stroke="#fb7185" d="M0,30 L20,32 L40,28 L60,34 L80,30 L100,36 L120,33 L140,38 L160,35 L180,40 L200,38"></path>
-      </svg>
+  <path id="fee-market-spark-area" class="spark-area" fill="#fb7185" d=""></path>
+  <path id="fee-market-spark-line" class="spark-path" stroke="#fb7185" d=""></path>
+</svg>
 
       <p class="text-sm text-slate-400 mt-3">
         Fee share is drifting below the trajectory needed to replace block subsidy over the next halving cycles. Trend over 24 months: declining.
@@ -319,6 +319,51 @@
       valueColorClass = 'text-rose-300';
     }
 
+// --- Bouw sparkline uit tijdreeks ---
+    // Per bucket: fee share = avgFees / avgRewards × 100
+    const points = feesData
+      .map((b, i) => {
+        const reward = rewardsData[i]?.avgRewards || 0;
+        const fees   = b.avgFees || 0;
+        return reward > 0 ? (fees / reward) * 100 : null;
+      })
+      .filter(v => v !== null);
+
+    if (points.length >= 2) {
+      // Schaal naar viewBox 200 × 50 met 4px padding boven/onder
+      const W = 200, H = 50, PAD = 4;
+      const min = Math.min(...points);
+      const max = Math.max(...points);
+      const range = (max - min) || 1; // vermijd delen door 0
+
+      const coords = points.map((v, i) => {
+        const x = (i / (points.length - 1)) * W;
+        // y = 0 bovenaan in SVG, dus hoge waarde → kleine y
+        const y = PAD + (1 - (v - min) / range) * (H - 2 * PAD);
+        return [x.toFixed(2), y.toFixed(2)];
+      });
+
+      const linePath = 'M' + coords.map(p => p.join(',')).join(' L');
+      const areaPath = linePath + ` L${W},${H} L0,${H} Z`;
+
+      // Kleur matched de status-kleur van de waarde
+      const sparkColor = valueColorClass === 'text-emerald-400' ? '#34d399'
+                      : valueColorClass === 'text-rose-300'    ? '#fda4af'
+                      : '#fb7185'; // rose-400
+
+      const lineEl = document.getElementById('fee-market-spark-line');
+      const areaEl = document.getElementById('fee-market-spark-area');
+      if (lineEl) {
+        lineEl.setAttribute('d', linePath);
+        lineEl.setAttribute('stroke', sparkColor);
+      }
+      if (areaEl) {
+        areaEl.setAttribute('d', areaPath);
+        areaEl.setAttribute('fill', sparkColor);
+      }
+    }
+
+    
     if (badgeEl) {
       badgeEl.textContent = status;
       badgeEl.className   = badgeClasses;
