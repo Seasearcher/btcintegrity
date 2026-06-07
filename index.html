@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="en"><head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BTC Integrity Monitor</title>
@@ -21,7 +23,7 @@
     </div>
     <div class="flex items-center gap-3 text-sm">
       <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-      <span id="last-updated" class="text-slate-300 mono">Last updated: 06 Jun 2026, 14:32 UTC</span>
+      <span id="last-updated" class="text-slate-300 mono">Last updated: —</span>
     </div>
   </div>
 </header>
@@ -66,21 +68,20 @@
           <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 1</p>
           <h3 class="font-semibold text-slate-200 mt-0.5">Fee Market Maturity</h3>
         </div>
-        <span id="fee-market-badge" class="text-xs px-2 py-1 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">Concern</span>
+        <span id="fee-market-badge" class="text-xs px-2 py-1 rounded bg-slate-700/30 text-slate-400 border border-slate-600/30">—</span>
       </div>
       <p class="text-xs italic text-slate-500 mb-3">Is the fee market maturing on schedule?</p>
 
-      <p id="fee-market-value" class="text-3xl font-bold text-rose-400 mono">6.4%</p>
-      <p class="text-xs text-slate-500 mt-1">Fees as share of total block reward (90d avg)</p>
+      <p id="fee-market-value" class="text-3xl font-bold text-slate-400 mono">—</p>
+      <p class="text-xs text-slate-500 mt-1">Fees as share of total block reward in BTC (90d avg)</p>
 
-      <!-- Sparkline -->
       <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
-  <path id="fee-market-spark-area" class="spark-area" fill="#fb7185" d=""></path>
-  <path id="fee-market-spark-line" class="spark-path" stroke="#fb7185" d=""></path>
-</svg>
+        <path id="fee-market-spark-area" class="spark-area" fill="#94a3b8" d=""></path>
+        <path id="fee-market-spark-line" class="spark-path" stroke="#94a3b8" d=""></path>
+      </svg>
 
       <p class="text-sm text-slate-400 mt-3">
-        Fee share is drifting below the trajectory needed to replace block subsidy over the next halving cycles. Trend over 24 months: declining.
+        The share of miner revenue derived from transaction fees rather than the block subsidy, measured in BTC. Relevant because the subsidy halves every four years and trends toward zero.
       </p>
     </article>
 
@@ -98,7 +99,6 @@
       <p class="text-3xl font-bold text-emerald-400 mono">0.92%</p>
       <p class="text-xs text-slate-500 mt-1">Annualized miner revenue ÷ market cap</p>
 
-      <!-- Sparkline -->
       <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
         <path class="spark-area" fill="#34d399" d="M0,32 L20,30 L40,28 L60,26 L80,28 L100,24 L120,22 L140,24 L160,20 L180,22 L200,18 L200,50 L0,50 Z"></path>
         <path class="spark-path" stroke="#34d399" d="M0,32 L20,30 L40,28 L60,26 L80,28 L100,24 L120,22 L140,24 L160,20 L180,22 L200,18"></path>
@@ -123,7 +123,6 @@
       <p class="text-3xl font-bold text-amber-400 mono">0.21</p>
       <p class="text-xs text-slate-500 mt-1">HHI of top mining pools (30d)</p>
 
-      <!-- Sparkline -->
       <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
         <path class="spark-area" fill="#fbbf24" d="M0,28 L20,26 L40,24 L60,22 L80,20 L100,22 L120,18 L140,16 L160,18 L180,14 L200,15 L200,50 L0,50 Z"></path>
         <path class="spark-path" stroke="#fbbf24" d="M0,28 L20,26 L40,24 L60,22 L80,20 L100,22 L120,18 L140,16 L160,18 L180,14 L200,15"></path>
@@ -148,7 +147,6 @@
       <p class="text-3xl font-bold text-emerald-400 mono">99.4%</p>
       <p class="text-xs text-slate-500 mt-1">Blocks willing to include OFAC-tagged tx</p>
 
-      <!-- Sparkline -->
       <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
         <path class="spark-area" fill="#34d399" d="M0,18 L20,16 L40,20 L60,18 L80,14 L100,16 L120,12 L140,15 L160,12 L180,14 L200,12 L200,50 L0,50 Z"></path>
         <path class="spark-path" stroke="#34d399" d="M0,18 L20,16 L40,20 L60,18 L80,14 L100,16 L120,12 L140,15 L160,12 L180,14 L200,12"></path>
@@ -173,7 +171,6 @@
       <p class="text-3xl font-bold text-rose-400 mono">31.8%</p>
       <p class="text-xs text-slate-500 mt-1">Supply held by top-10 custodians (ETFs, exchanges)</p>
 
-      <!-- Sparkline (rising = worsening for this metric) -->
       <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
         <path class="spark-area" fill="#fb7185" d="M0,38 L20,36 L40,34 L60,30 L80,28 L100,24 L120,22 L140,18 L160,16 L180,12 L200,10 L200,50 L0,50 Z"></path>
         <path class="spark-path" stroke="#fb7185" d="M0,38 L20,36 L40,34 L60,30 L80,28 L100,24 L120,22 L140,18 L160,16 L180,12 L200,10"></path>
@@ -198,7 +195,6 @@
       <p class="text-3xl font-bold text-amber-400 mono">86 / 12 / 2</p>
       <p class="text-xs text-slate-500 mt-1">Core / Knots / Other (% of reachable nodes)</p>
 
-      <!-- Stacked bar -->
       <div class="mt-3 h-3 w-full rounded-full overflow-hidden bg-slate-800 flex">
         <div class="bg-orange-400" style="width: 86%"></div>
         <div class="bg-purple-400" style="width: 12%"></div>
@@ -210,7 +206,6 @@
         <span class="flex items-center gap-1.5"><span class="inline-block w-2 h-2 rounded-sm bg-slate-500"></span>Other</span>
       </div>
 
-      <!-- Sparkline: Knots share growth over time -->
       <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
         <path class="spark-area" fill="#c084fc" d="M0,44 L20,43 L40,42 L60,40 L80,38 L100,34 L120,30 L140,26 L160,22 L180,18 L200,15 L200,50 L0,50 Z"></path>
         <path class="spark-path" stroke="#c084fc" d="M0,44 L20,43 L40,42 L60,40 L80,38 L100,34 L120,30 L140,26 L160,22 L180,18 L200,15"></path>
@@ -262,137 +257,7 @@
   </div>
 </footer>
 
+<script type="module" src="js/main.js"></script>
 
-
-<script>
-(async function updateFeeMarket() {
-  const valueEl   = document.getElementById('fee-market-value');
-  const badgeEl   = document.getElementById('fee-market-badge');
-  const updatedEl = document.getElementById('last-updated');
-
-  if (!valueEl) {
-    console.error('fee-market-value element not found');
-    return;
-  }
-
-  try {
-    // mempool.space — geen API key, gratis, open data
-    // '3m' = laatste 3 maanden (~90 dagen aan blocks)
-    const [feesRes, rewardsRes] = await Promise.all([
-      fetch('https://mempool.space/api/v1/mining/blocks/fees/3m'),
-      fetch('https://mempool.space/api/v1/mining/blocks/rewards/3m')
-    ]);
-
-    if (!feesRes.ok || !rewardsRes.ok) {
-      throw new Error('mempool.space API returned non-OK status');
-    }
-
-    const feesData    = await feesRes.json();
-    const rewardsData = await rewardsRes.json();
-
-    // Som over alle tijdsbuckets (waarden zijn in satoshis)
-    const totalFees    = feesData.reduce((s, b) => s + (b.avgFees    || 0), 0);
-    const totalRewards = rewardsData.reduce((s, b) => s + (b.avgRewards || 0), 0);
-
-    if (totalRewards === 0) throw new Error('No reward data available');
-
-    // Fee share = fees / total block reward (fees + subsidy) × 100
-    const feeShare = (totalFees / totalRewards) * 100;
-
-    // --- Update de waarde ---
-    valueEl.textContent = feeShare.toFixed(1) + '%';
-
-    // --- Bepaal status, kleur en Tailwind classes ---
-    // Drempels: >15% Healthy, 5-15% Concern, <5% Critical
-    let status, badgeClasses, valueColorClass;
-    if (feeShare >= 15) {
-      status          = 'Healthy';
-      badgeClasses    = 'text-xs px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
-      valueColorClass = 'text-emerald-400';
-    } else if (feeShare >= 5) {
-      status          = 'Concern';
-      badgeClasses    = 'text-xs px-2 py-1 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20';
-      valueColorClass = 'text-rose-400';
-    } else {
-      status          = 'Critical';
-      badgeClasses    = 'text-xs px-2 py-1 rounded bg-rose-600/20 text-rose-300 border border-rose-600/40';
-      valueColorClass = 'text-rose-300';
-    }
-
-// --- Bouw sparkline uit tijdreeks ---
-    // Per bucket: fee share = avgFees / avgRewards × 100
-    const points = feesData
-      .map((b, i) => {
-        const reward = rewardsData[i]?.avgRewards || 0;
-        const fees   = b.avgFees || 0;
-        return reward > 0 ? (fees / reward) * 100 : null;
-      })
-      .filter(v => v !== null);
-
-    if (points.length >= 2) {
-      // Schaal naar viewBox 200 × 50 met 4px padding boven/onder
-      const W = 200, H = 50, PAD = 4;
-      const min = Math.min(...points);
-      const max = Math.max(...points);
-      const range = (max - min) || 1; // vermijd delen door 0
-
-      const coords = points.map((v, i) => {
-        const x = (i / (points.length - 1)) * W;
-        // y = 0 bovenaan in SVG, dus hoge waarde → kleine y
-        const y = PAD + (1 - (v - min) / range) * (H - 2 * PAD);
-        return [x.toFixed(2), y.toFixed(2)];
-      });
-
-      const linePath = 'M' + coords.map(p => p.join(',')).join(' L');
-      const areaPath = linePath + ` L${W},${H} L0,${H} Z`;
-
-      // Kleur matched de status-kleur van de waarde
-      const sparkColor = valueColorClass === 'text-emerald-400' ? '#34d399'
-                      : valueColorClass === 'text-rose-300'    ? '#fda4af'
-                      : '#fb7185'; // rose-400
-
-      const lineEl = document.getElementById('fee-market-spark-line');
-      const areaEl = document.getElementById('fee-market-spark-area');
-      if (lineEl) {
-        lineEl.setAttribute('d', linePath);
-        lineEl.setAttribute('stroke', sparkColor);
-      }
-      if (areaEl) {
-        areaEl.setAttribute('d', areaPath);
-        areaEl.setAttribute('fill', sparkColor);
-      }
-    }
-
-    
-    if (badgeEl) {
-      badgeEl.textContent = status;
-      badgeEl.className   = badgeClasses;
-    }
-
-    // Vervang de kleur-class van de waarde
-    valueEl.className = `text-3xl font-bold ${valueColorClass} mono`;
-
-    // --- Update timestamp ---
-    if (updatedEl) {
-      const now = new Date();
-      const dd  = String(now.getUTCDate()).padStart(2, '0');
-      const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][now.getUTCMonth()];
-      const yyyy= now.getUTCFullYear();
-      const hh  = String(now.getUTCHours()).padStart(2,'0');
-      const mm  = String(now.getUTCMinutes()).padStart(2,'0');
-      updatedEl.textContent = `Last updated: ${dd} ${mon} ${yyyy}, ${hh}:${mm} UTC`;
-    }
-
-    console.log('✅ Fee Market updated:', feeShare.toFixed(2) + '% (' + status + ')');
-
-  } catch (err) {
-    console.error('⚠️ Fee Market update failed:', err);
-    if (badgeEl) {
-      badgeEl.title           = 'Live data unavailable — showing last known value';
-      badgeEl.style.opacity   = '0.6';
-    }
-  }
-})();
-</script>
-
-</body></html>
+</body>
+</html>
