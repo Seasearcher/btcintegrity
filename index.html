@@ -111,28 +111,25 @@
 </article>
 
     <!-- 3. MINING DECENTRALIZATION -->
-    <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition flex flex-col">
-      <div class="flex items-start justify-between mb-1">
-        <div>
-          <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 3</p>
-          <h3 class="font-semibold text-slate-200 mt-0.5">Mining Decentralization</h3>
-        </div>
-        <span class="text-xs px-2 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">Watch</span>
-      </div>
-      <p class="text-xs italic text-slate-500 mb-3">Is the security being provided still decentralized?</p>
+<article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition flex flex-col">
+  <div class="flex items-start justify-between mb-1">
+    <div>
+      <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 3</p>
+      <h3 class="font-semibold text-slate-200 mt-0.5">Mining Decentralization</h3>
+    </div>
+    <span id="mining-decentralization-badge" class="text-xs px-2 py-1 rounded bg-slate-700/30 text-slate-400 border border-slate-600/30">—</span>
+  </div>
+  <p class="text-xs italic text-slate-500 mb-3">Is the security being provided still decentralized?</p>
 
-      <p class="text-3xl font-bold text-amber-400 mono">0.21</p>
-      <p class="text-xs text-slate-500 mt-1">HHI of top mining pools (30d)</p>
+  <p id="mining-decentralization-value" class="text-3xl font-bold text-slate-400 mono">—</p>
+  <p class="text-xs text-slate-500 mt-1">HHI of mining pools (last 7 days)</p>
 
-      <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
-        <path class="spark-area" fill="#fbbf24" d="M0,28 L20,26 L40,24 L60,22 L80,20 L100,22 L120,18 L140,16 L160,18 L180,14 L200,15 L200,50 L0,50 Z"></path>
-        <path class="spark-path" stroke="#fbbf24" d="M0,28 L20,26 L40,24 L60,22 L80,20 L100,22 L120,18 L140,16 L160,18 L180,14 L200,15"></path>
-      </svg>
+  <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
+    <g id="mining-decentralization-bar"></g>
+  </svg>
 
-      <p class="text-sm text-slate-400 mt-3">
-        Top 2 pools account for ~52% of blocks; stratum-template centralization (Foundry/AntPool) is the underlying risk, not pool-count alone.
-      </p>
-    </article>
+  <p id="mining-decentralization-description" class="text-sm text-slate-400 mt-3">—</p>
+</article>
 
 <!-- 4. TRANSACTION INCLUSION -->
 <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition flex flex-col">
