@@ -2,9 +2,24 @@
 // Annualized miner revenue ÷ market cap
 
 const STATUS = {
-  HEALTHY:  { label: 'Healthy',  className: 'healthy'  },
-  CONCERN:  { label: 'Concern',  className: 'concern'  },
-  CRITICAL: { label: 'Critical', className: 'critical' },
+  HEALTHY:  {
+    label: 'Healthy',
+    classes: 'text-xs px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+    valueColor: 'text-emerald-400',
+    sparkColor: '#34d399',
+  },
+  CONCERN:  {
+    label: 'Concern',
+    classes: 'text-xs px-2 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20',
+    valueColor: 'text-amber-400',
+    sparkColor: '#fbbf24',
+  },
+  CRITICAL: {
+    label: 'Critical',
+    classes: 'text-xs px-2 py-1 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20',
+    valueColor: 'text-rose-400',
+    sparkColor: '#fb7185',
+  },
 };
 
 function getStatus(ratioPct) {
@@ -20,24 +35,22 @@ function formatUSD(n) {
   return `$${n.toFixed(0)}`;
 }
 
-function renderSparkline(svgEl, values) {
-  if (!svgEl || !values?.length) return;
-  const w = 300, h = 40, pad = 2;
+function buildSparkPaths(values, width = 200, height = 50) {
+  if (!values?.length) return { line: '', area: '' };
   const min = Math.min(...values);
   const max = Math.max(...values);
   const range = max - min || 1;
-  const step = (w - pad * 2) / (values.length - 1);
+  const step = width / (values.length - 1);
 
-  const points = values
-    .map((v, i) => {
-      const x = pad + i * step;
-      const y = h - pad - ((v - min) / range) * (h - pad * 2);
-      return `${x.toFixed(2)},${y.toFixed(2)}`;
-    })
-    .join(' ');
+  const pts = values.map((v, i) => {
+    const x = i * step;
+    const y = height - ((v - min) / range) * height;
+    return [x, y];
+  });
 
-  svgEl.setAttribute('viewBox', `0 0 ${w} ${h}`);
-  svgEl.innerHTML = `<polyline points="${points}" fill="none" stroke="currentColor" stroke-width="1.5" />`;
+  const line = pts.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(2)},${y.toFixed(2)}`).join(' ');
+  const area = `${line} L${width},${height} L0,${height} Z`;
+  return { line, area };
 }
 
 export async function updateSecurityBudget() {
@@ -66,25 +79,34 @@ export async function updateSecurityBudget() {
   // --- Status ---
   const status = getStatus(ratioPct);
 
-  // --- Narrative (Option B) ---
-  const narrative =
-    `Attackers must outspend ~${formatUSD(hourlyAttackCost)}/hour and sustain it for hours or days. ` +
-    `Security spend relative to market cap; trends downward at each halving and must be replaced by fees long-term.`;
+  // --- Update DOM (matching the actual IDs in index.html) ---
+  const valueEl   = document.getElementById('security-budget-value');
+  const badgeEl   = document.getElementById('security-budget-badge');
+  const costEl    = document.getElementById('security-budget-attack-cost');
+  const sparkLine = document.getElementById('security-budget-spark-line');
+  const sparkArea = document.getElementById('security-budget-spark-area');
 
-  // --- Update DOM ---
-  const valueEl     = document.getElementById('security-budget-value');
-  const statusEl    = document.getElementById('security-budget-status');
-  const narrativeEl = document.getElementById('security-budget-narrative');
-  const sparkEl     = document.getElementById('security-budget-sparkline');
-
-  if (valueEl)     valueEl.textContent = `${ratioPct.toFixed(2)}%`;
-  if (statusEl) {
-    statusEl.textContent = status.label;
-    statusEl.className = `status-pill ${status.className}`;
+  if (valueEl) {
+    valueEl.textContent = `${ratioPct.toFixed(2)}%`;
+    valueEl.className = `text-3xl font-bold mono ${status.valueColor}`;
   }
-  if (narrativeEl) narrativeEl.textContent = narrative;
-  if (sparkEl && sparkData) {
-    renderSparkline(sparkEl, sparkData.values.map(p => p.y));
+
+  if (badgeEl) {
+    badgeEl.textContent = status.label;
+    badgeEl.className = status.classes;
+  }
+
+  if (costEl) {
+    costEl.textContent = formatUSD(hourlyAttackCost);
+  }
+
+  if (sparkData && sparkLine && sparkArea) {
+    const values = sparkData.values.map(p => p.y);
+    const { line, area } = buildSparkPaths(values);
+    sparkLine.setAttribute('d', line);
+    sparkLine.setAttribute('stroke', status.sparkColor);
+    sparkArea.setAttribute('d', area);
+    sparkArea.setAttribute('fill', status.sparkColor);
   }
 
   console.log(`✅ Security Budget: ${ratioPct.toFixed(2)}% (${status.label}) — attack cost ~${formatUSD(hourlyAttackCost)}/hr`);
