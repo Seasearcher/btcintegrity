@@ -1,3 +1,34 @@
+// Indicator 4: Transaction Inclusion
+// Source: mempool.space pool match-rate data (1w window)
+// Measures: weighted avg of how closely pool blocks match expected templates
+
+const STATUS = {
+  HEALTHY: {
+    label: 'Healthy',
+    classes: 'text-xs px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+    valueColor: 'text-emerald-400',
+    barColor: '#34d399',
+  },
+  WATCH: {
+    label: 'Watch',
+    classes: 'text-xs px-2 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20',
+    valueColor: 'text-amber-400',
+    barColor: '#fbbf24',
+  },
+  CONCERN: {
+    label: 'Concern',
+    classes: 'text-xs px-2 py-1 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20',
+    valueColor: 'text-rose-400',
+    barColor: '#fb7185',
+  },
+};
+
+function getStatus(matchRate) {
+  if (matchRate >= 98) return STATUS.HEALTHY;
+  if (matchRate >= 95) return STATUS.WATCH;
+  return STATUS.CONCERN;
+}
+
 export async function updateTransactionInclusion() {
   try {
     const res = await fetch('https://mempool.space/api/v1/mining/pools/1w');
@@ -25,29 +56,16 @@ export async function updateTransactionInclusion() {
     const predictableShare = (predictableBlocks / trackedBlocks) * 100;
 
     // --- 2. Determine status ---
-    let label, badgeClasses, valueColor;
-    if (matchRate >= 98) {
-      label = 'Healthy';
-      badgeClasses = 'text-xs px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
-      valueColor = 'text-emerald-400';
-    } else if (matchRate >= 95) {
-      label = 'Watch';
-      badgeClasses = 'text-xs px-2 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20';
-      valueColor = 'text-amber-400';
-    } else {
-      label = 'Concern';
-      badgeClasses = 'text-xs px-2 py-1 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20';
-      valueColor = 'text-rose-400';
-    }
+    const status = getStatus(matchRate);
 
     // --- 3. Update DOM ---
     const valueEl = document.getElementById('transaction-inclusion-value');
     valueEl.textContent = matchRate.toFixed(2) + '%';
-    valueEl.className = 'text-3xl font-bold mono ' + valueColor;
+    valueEl.className = 'text-3xl font-bold mono ' + status.valueColor;
 
     const badge = document.getElementById('transaction-inclusion-badge');
-    badge.textContent = label;
-    badge.className = badgeClasses;
+    badge.textContent = status.label;
+    badge.className = status.classes;
 
     document.getElementById('transaction-inclusion-blocks').textContent =
       totalBlocks.toLocaleString();
@@ -57,8 +75,13 @@ export async function updateTransactionInclusion() {
     // --- 4. Render per-pool bars ---
     drawPoolBars(pools.filter(p => p.slug !== 'unknown'));
 
+    console.log(
+      `✅ Transaction Inclusion: ${matchRate.toFixed(2)}% (${status.label}) ` +
+      `— ${trackedBlocks} tracked blocks, ${predictableShare.toFixed(1)}% predictable`
+    );
+
   } catch (err) {
-    console.error('Transaction Inclusion indicator failed:', err);
+    console.error('⚠️ Transaction Inclusion indicator failed:', err);
     const v = document.getElementById('transaction-inclusion-value');
     if (v) v.textContent = '—';
   }
@@ -84,11 +107,11 @@ function drawPoolBars(pools) {
     return H - ((clamped - Y_MIN) / (Y_MAX - Y_MIN)) * H;
   };
 
-  // Match the Tailwind palette used elsewhere
+  // Use the same status palette as the headline value
   const colorFor = rate => {
-    if (rate >= 98) return '#34d399';   // emerald-400
-    if (rate >= 95) return '#fbbf24';   // amber-400
-    return '#fb7185';                   // rose-400
+    if (rate >= 98) return STATUS.HEALTHY.barColor;
+    if (rate >= 95) return STATUS.WATCH.barColor;
+    return STATUS.CONCERN.barColor;
   };
 
   g.innerHTML = '';

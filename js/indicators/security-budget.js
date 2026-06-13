@@ -2,20 +2,20 @@
 // Annualized miner revenue ÷ market cap
 
 const STATUS = {
-  HEALTHY:  {
+  HEALTHY: {
     label: 'Healthy',
     classes: 'text-xs px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
     valueColor: 'text-emerald-400',
     sparkColor: '#34d399',
   },
-  CONCERN:  {
-    label: 'Concern',
+  WATCH: {
+    label: 'Watch',
     classes: 'text-xs px-2 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20',
     valueColor: 'text-amber-400',
     sparkColor: '#fbbf24',
   },
-  CRITICAL: {
-    label: 'Critical',
+  CONCERN: {
+    label: 'Concern',
     classes: 'text-xs px-2 py-1 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20',
     valueColor: 'text-rose-400',
     sparkColor: '#fb7185',
@@ -24,8 +24,8 @@ const STATUS = {
 
 function getStatus(ratioPct) {
   if (ratioPct >= 0.75) return STATUS.HEALTHY;
-  if (ratioPct >= 0.50) return STATUS.CONCERN;
-  return STATUS.CRITICAL;
+  if (ratioPct >= 0.50) return STATUS.WATCH;
+  return STATUS.CONCERN;
 }
 
 function formatUSD(n) {
