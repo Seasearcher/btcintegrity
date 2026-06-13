@@ -87,28 +87,28 @@
     </article>
 
     <!-- 2. SECURITY BUDGET -->
-    <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition flex flex-col">
-      <div class="flex items-start justify-between mb-1">
-        <div>
-          <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 2</p>
-          <h3 class="font-semibold text-slate-200 mt-0.5">Security Budget</h3>
-        </div>
-        <span class="text-xs px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Healthy</span>
-      </div>
-      <p class="text-xs italic text-slate-500 mb-3">Is total security spend adequate for what's being secured?</p>
+<article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition flex flex-col">
+  <div class="flex items-start justify-between mb-1">
+    <div>
+      <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 2</p>
+      <h3 class="font-semibold text-slate-200 mt-0.5">Security Budget</h3>
+    </div>
+    <span id="security-budget-badge" class="text-xs px-2 py-1 rounded bg-slate-700/30 text-slate-400 border border-slate-600/30">—</span>
+  </div>
+  <p class="text-xs italic text-slate-500 mb-3">Is total security spend adequate for what's being secured?</p>
 
-      <p class="text-3xl font-bold text-emerald-400 mono">0.92%</p>
-      <p class="text-xs text-slate-500 mt-1">Annualized miner revenue ÷ market cap</p>
+  <p id="security-budget-value" class="text-3xl font-bold text-slate-400 mono">—</p>
+  <p class="text-xs text-slate-500 mt-1">Annualized miner revenue ÷ market cap</p>
 
-      <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
-        <path class="spark-area" fill="#34d399" d="M0,32 L20,30 L40,28 L60,26 L80,28 L100,24 L120,22 L140,24 L160,20 L180,22 L200,18 L200,50 L0,50 Z"></path>
-        <path class="spark-path" stroke="#34d399" d="M0,32 L20,30 L40,28 L60,26 L80,28 L100,24 L120,22 L140,24 L160,20 L180,22 L200,18"></path>
-      </svg>
+  <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
+    <path id="security-budget-spark-area" class="spark-area" fill="#94a3b8" d=""></path>
+    <path id="security-budget-spark-line" class="spark-path" stroke="#94a3b8" d=""></path>
+  </svg>
 
-      <p class="text-sm text-slate-400 mt-3">
-        Estimated 1-hour 51% attack cost: <span class="mono">$3.1M</span>. Security spend remains well above the Budish threshold relative to value secured.
-      </p>
-    </article>
+  <p class="text-sm text-slate-400 mt-3">
+    Estimated 1-hour attack cost: <span id="security-budget-attack-cost" class="mono">—</span>. Security spend relative to market cap; trends downward at each halving and must be replaced by fees long-term.
+  </p>
+</article>
 
     <!-- 3. MINING DECENTRALIZATION -->
     <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition flex flex-col">
