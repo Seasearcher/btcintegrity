@@ -22,8 +22,8 @@ const ENDPOINTS = {
 // Re-tune after each halving as fee share naturally doubles relative to subsidy.
 const THRESHOLDS = {
   healthy: 2,    // >= 2%   = strong fee demand, market maturing
-  concern: 0.5,  // 0.5-2%  = normal baseline
-  // < 0.5%        = critical, near subsidy-only economy
+  watch:   0.5,  // 0.5-2%  = normal baseline, worth watching
+  // < 0.5%        = concern, near subsidy-only economy
 };
 
 // Smoothing window for the sparkline (in buckets).
@@ -36,22 +36,22 @@ const STATUS_STYLES = {
     valueClass: 'text-emerald-400',
     sparkColor: '#34d399',
   },
-  Concern: {
+  Watch: {
     badge: 'text-xs px-2 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20',
     valueClass: 'text-amber-400',
     sparkColor: '#fbbf24',
   },
-  Critical: {
-    badge: 'text-xs px-2 py-1 rounded bg-rose-600/20 text-rose-300 border border-rose-600/40',
-    valueClass: 'text-rose-300',
-    sparkColor: '#fda4af',
+  Concern: {
+    badge: 'text-xs px-2 py-1 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20',
+    valueClass: 'text-rose-400',
+    sparkColor: '#fb7185',
   },
 };
 
 function classifyStatus(feeShare) {
   if (feeShare >= THRESHOLDS.healthy) return 'Healthy';
-  if (feeShare >= THRESHOLDS.concern) return 'Concern';
-  return 'Critical';
+  if (feeShare >= THRESHOLDS.watch)   return 'Watch';
+  return 'Concern';
 }
 
 // Apply a trailing rolling average to smooth out per-bucket noise.
