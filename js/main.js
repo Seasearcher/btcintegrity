@@ -1,6 +1,7 @@
 // Orchestrator: loads and runs all indicator updates
 import { updateFeeMarket }      from './indicators/fee-market.js';
 import { updateSecurityBudget } from './indicators/security-budget.js';
+import { updateTransactionInclusion } from './indicators/transaction-inclusion.js';
 import { updateTimestamp }      from './utils/timestamp.js';
 
 async function init() {
@@ -8,9 +9,9 @@ async function init() {
   const results = await Promise.allSettled([
     updateFeeMarket(),
     updateSecurityBudget(),
+    updateTransactionInclusion(),
     // Future indicators will be added here:
     // updateMiningDecentralization(),
-    // updateCensorshipResistance(),
     // updateCustodialConcentration(),
     // updateNodeDiversity(),
   ]);
