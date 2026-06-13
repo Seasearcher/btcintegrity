@@ -1,13 +1,14 @@
 // Orchestrator: loads and runs all indicator updates
-import { updateFeeMarket } from './indicators/fee-market.js';
-import { updateTimestamp } from './utils/timestamp.js';
+import { updateFeeMarket }      from './indicators/fee-market.js';
+import { updateSecurityBudget } from './indicators/security-budget.js';
+import { updateTimestamp }      from './utils/timestamp.js';
 
 async function init() {
   // Run all indicator updates in parallel
   const results = await Promise.allSettled([
     updateFeeMarket(),
+    updateSecurityBudget(),
     // Future indicators will be added here:
-    // updateSecurityBudget(),
     // updateMiningDecentralization(),
     // updateCensorshipResistance(),
     // updateCustodialConcentration(),
