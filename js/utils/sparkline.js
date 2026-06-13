@@ -29,8 +29,13 @@ export function renderSparkline({ lineId, areaId, points, color }) {
     lineEl.setAttribute('d', linePath);
     if (color) lineEl.setAttribute('stroke', color);
   }
-  if (areaEl) {
-    areaEl.setAttribute('d', areaPath);
-    if (color) areaEl.setAttribute('fill', color);
+
+if (areaEl) {
+  areaEl.setAttribute('d', areaPath);
+  if (color) {
+    areaEl.setAttribute('fill', color);
+    areaEl.setAttribute('fill-opacity', '0.15');
   }
 }
+
+
