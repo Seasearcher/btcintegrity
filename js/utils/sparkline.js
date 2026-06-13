@@ -37,5 +37,5 @@ if (areaEl) {
     areaEl.setAttribute('fill-opacity', '0.15');
   }
 }
-
+}
 
