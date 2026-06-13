@@ -68,10 +68,9 @@ export async function updateMiningDecentralization() {
       `${arr.slice(0, -1).join(', ')}, and ${arr[arr.length - 1]}`;
 
     const desc =
-      `<strong>${nakamoto}</strong> pools (${fmtList(topNames)}) account for ` +
-      `<strong>${(top50Share * 100).toFixed(1)}%</strong> of blocks over the last week. ` +
-      `Pool concentration is the visible layer; underlying stratum-template providers ` +
-      `(Foundry, AntPool) concentrate further still.`;
+  `<strong>${nakamoto}</strong> pools (${fmtList(topNames)}) account for ` +
+  `<strong>${(top50Share * 100).toFixed(1)}%</strong> of blocks over the last week. ` +
+  `Template-provider concentration may be higher than visible pool shares suggest.`;
 
     document.getElementById('mining-decentralization-description').innerHTML = desc;
 
