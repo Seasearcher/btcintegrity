@@ -4,6 +4,7 @@ import { updateSecurityBudget }         from './indicators/security-budget.js';
 import { updateMiningDecentralization } from './indicators/mining-decentralization.js';
 import { updateTransactionInclusion }   from './indicators/transaction-inclusion.js';
 import { updateCustodialConcentration } from './indicators/custodial-concentration.js';
+import { updateNodeDiversity }          from './indicators/node-diversity.js';
 import { updateTimestamp }              from './utils/timestamp.js';
 
 async function init() {
@@ -14,12 +15,11 @@ async function init() {
     updateMiningDecentralization(),
     updateTransactionInclusion(),
     updateCustodialConcentration(),
-    // Future indicators will be added here
-    // updateNodeDiversity(),
+    updateNodeDiversity(),
   ]);
 
   // Log any failures without breaking the page
-  results.forEach((result, i) => {
+ results.forEach((result, i) => {
     if (result.status === 'rejected') {
       console.error(`Indicator ${i + 1} failed:`, result.reason);
     }
