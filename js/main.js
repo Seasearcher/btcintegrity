@@ -3,6 +3,7 @@ import { updateFeeMarket }              from './indicators/fee-market.js';
 import { updateSecurityBudget }         from './indicators/security-budget.js';
 import { updateMiningDecentralization } from './indicators/mining-decentralization.js';
 import { updateTransactionInclusion }   from './indicators/transaction-inclusion.js';
+import { updateCustodialConcentration } from './indicators/custodial-concentration.js';
 import { updateTimestamp }              from './utils/timestamp.js';
 
 async function init() {
@@ -12,8 +13,8 @@ async function init() {
     updateSecurityBudget(),
     updateMiningDecentralization(),
     updateTransactionInclusion(),
-    // Future indicators will be added here:
-    // updateCustodialConcentration(),
+    updateCustodialConcentration(),
+    // Future indicators will be added here
     // updateNodeDiversity(),
   ]);
 
