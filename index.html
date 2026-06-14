@@ -177,39 +177,34 @@
 </article>
 
     <!-- 6. NODE SOFTWARE DIVERSITY -->
-    <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition flex flex-col">
-      <div class="flex items-start justify-between mb-1">
-        <div>
-          <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 6 Under Construction</p>
-          <h3 class="font-semibold text-slate-200 mt-0.5">Node Software Diversity</h3>
-        </div>
-        <span class="text-xs px-2 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">Watch</span>
-      </div>
-      <p class="text-xs italic text-slate-500 mb-3">What is the level of node implementation diversity?</p>
+<article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition flex flex-col">
+  <div class="flex items-start justify-between mb-1">
+    <div>
+      <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 6</p>
+      <h3 class="font-semibold text-slate-200 mt-0.5">Node Software Diversity</h3>
+    </div>
+    <span id="node-diversity-badge" class="text-xs px-2 py-1 rounded bg-slate-700/30 text-slate-400 border border-slate-600/30">—</span>
+  </div>
+  <p class="text-xs italic text-slate-500 mb-3">What is the level of node implementation diversity?</p>
 
-      <p class="text-3xl font-bold text-amber-400 mono">86 / 12 / 2</p>
-      <p class="text-xs text-slate-500 mt-1">Core / Knots / Other (% of reachable nodes)</p>
+  <p id="node-diversity-value" class="text-3xl font-bold text-slate-400 mono">—</p>
+  <p id="node-diversity-subtitle" class="text-xs text-slate-500 mt-1">Core / Knots / Other (% of reachable nodes)</p>
 
-      <div class="mt-3 h-3 w-full rounded-full overflow-hidden bg-slate-800 flex">
-        <div class="bg-orange-400" style="width: 86%"></div>
-        <div class="bg-purple-400" style="width: 12%"></div>
-        <div class="bg-slate-500" style="width: 2%"></div>
-      </div>
-      <div class="flex flex-wrap gap-3 text-xs text-slate-400 mt-2">
-        <span class="flex items-center gap-1.5"><span class="inline-block w-2 h-2 rounded-sm bg-orange-400"></span>Core</span>
-        <span class="flex items-center gap-1.5"><span class="inline-block w-2 h-2 rounded-sm bg-purple-400"></span>Knots</span>
-        <span class="flex items-center gap-1.5"><span class="inline-block w-2 h-2 rounded-sm bg-slate-500"></span>Other</span>
-      </div>
+  <div class="mt-3 h-3 w-full rounded-full overflow-hidden bg-slate-800 flex">
+    <div id="node-diversity-bar-core"  class="bg-orange-400" style="width: 0%"></div>
+    <div id="node-diversity-bar-knots" class="bg-purple-400" style="width: 0%"></div>
+    <div id="node-diversity-bar-other" class="bg-slate-500"  style="width: 0%"></div>
+  </div>
+  <div class="flex flex-wrap gap-3 text-xs text-slate-400 mt-2">
+    <span class="flex items-center gap-1.5"><span class="inline-block w-2 h-2 rounded-sm bg-orange-400"></span>Core</span>
+    <span class="flex items-center gap-1.5"><span class="inline-block w-2 h-2 rounded-sm bg-purple-400"></span>Knots</span>
+    <span class="flex items-center gap-1.5"><span class="inline-block w-2 h-2 rounded-sm bg-slate-500"></span>Other</span>
+  </div>
 
-      <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
-        <path class="spark-area" fill="#c084fc" d="M0,44 L20,43 L40,42 L60,40 L80,38 L100,34 L120,30 L140,26 L160,22 L180,18 L200,15 L200,50 L0,50 Z"></path>
-        <path class="spark-path" stroke="#c084fc" d="M0,44 L20,43 L40,42 L60,40 L80,38 L100,34 L120,30 L140,26 L160,22 L180,18 L200,15"></path>
-      </svg>
-
-      <p class="text-sm text-slate-400 mt-3">
-        Knots share has grown from ~2% (early 2024) to ~12%. Rising diversity reduces monoculture risk, but divergent relay policies between implementations can fragment mempool propagation.
-      </p>
-    </article>
+  <p class="text-sm text-slate-400 mt-3">
+    Knots share has grown from ~2% (early 2024) to ~12%. Rising diversity reduces monoculture risk, but divergent relay policies between implementations can fragment mempool propagation.
+  </p>
+</article>
 
   </div>
 </section>
