@@ -36,10 +36,13 @@ export async function updateNodeDiversity() {
     barKnots.style.width = knotsPct.toFixed(2) + '%';
     barOther.style.width = otherPct.toFixed(2) + '%';
 
-    valueEl.textContent =
-      `${corePct.toFixed(1)}% / ${knotsPct.toFixed(1)}% / ${otherPct.toFixed(1)}%`;
-    valueEl.classList.remove('text-slate-400');
-    valueEl.classList.add('text-slate-100');
+valueEl.innerHTML =
+  `<span class="text-orange-400">${corePct.toFixed(1)}%</span>` +
+  `<span class="text-slate-500 mx-1">/</span>` +
+  `<span class="text-purple-400">${knotsPct.toFixed(1)}%</span>` +
+  `<span class="text-slate-500 mx-1">/</span>` +
+  `<span class="text-slate-400">${otherPct.toFixed(1)}%</span>`;
+
 
     const ageHrs = meta?.timestamp
       ? ((Date.now() / 1000 - meta.timestamp) / 3600).toFixed(1)
