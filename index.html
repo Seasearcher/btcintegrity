@@ -87,99 +87,94 @@
     </article>
 
     <!-- 2. SECURITY BUDGET -->
-<article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition flex flex-col">
-  <div class="flex items-start justify-between mb-1">
-    <div>
-      <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 2</p>
-      <h3 class="font-semibold text-slate-200 mt-0.5">Security Budget</h3>
-    </div>
-    <span id="security-budget-badge" class="text-xs px-2 py-1 rounded bg-slate-700/30 text-slate-400 border border-slate-600/30">—</span>
-  </div>
-  <p class="text-xs italic text-slate-500 mb-3">Is total security spend adequate for what's being secured?</p>
-
-  <p id="security-budget-value" class="text-3xl font-bold text-slate-400 mono">—</p>
-  <p class="text-xs text-slate-500 mt-1">Annualized miner revenue ÷ market cap</p>
-
-  <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
-    <path id="security-budget-spark-area" class="spark-area" fill="#94a3b8" d=""></path>
-    <path id="security-budget-spark-line" class="spark-path" stroke="#94a3b8" d=""></path>
-  </svg>
-
-  <p class="text-sm text-slate-400 mt-3">
-  Attackers must outspend ~<span id="security-budget-attack-cost" class="mono">—</span>/hour and sustain it for hours or days. Security spend relative to market cap; trends downward at each halving and must be replaced by fees long-term.
-</p>
-</article>
-
-    <!-- 3. MINING DECENTRALIZATION -->
-<article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition flex flex-col">
-  <div class="flex items-start justify-between mb-1">
-    <div>
-      <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 3</p>
-      <h3 class="font-semibold text-slate-200 mt-0.5">Mining Decentralization</h3>
-    </div>
-    <span id="mining-decentralization-badge" class="text-xs px-2 py-1 rounded bg-slate-700/30 text-slate-400 border border-slate-600/30">—</span>
-  </div>
-  <p class="text-xs italic text-slate-500 mb-3">Is the security being provided still decentralized?</p>
-
-  <p id="mining-decentralization-value" class="text-3xl font-bold text-slate-400 mono">—</p>
-  <p class="text-xs text-slate-500 mt-1">HHI of mining pools (last 7 days)</p>
-
-  <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
-    <g id="mining-decentralization-bar"></g>
-  </svg>
-
-  <p id="mining-decentralization-description" class="text-sm text-slate-400 mt-3">—</p>
-</article>
-
-<!-- 4. TRANSACTION INCLUSION -->
-<article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition flex flex-col">
-  <div class="flex items-start justify-between mb-1">
-    <div>
-      <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 4</p>
-      <h3 class="font-semibold text-slate-200 mt-0.5">Transaction Inclusion</h3>
-    </div>
-    <span id="transaction-inclusion-badge" class="text-xs px-2 py-1 rounded bg-slate-700/30 text-slate-400 border border-slate-600/30">—</span>
-  </div>
-  <p class="text-xs italic text-slate-500 mb-3">Are transactions reliably mined regardless of who sends them?</p>
-
-  <p id="transaction-inclusion-value" class="text-3xl font-bold text-slate-400 mono">—</p>
-  <p class="text-xs text-slate-500 mt-1">Weighted block-template match rate (last 7 days)</p>
-
-  <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
-    <g id="transaction-inclusion-bars"></g>
-  </svg>
-
-  <p class="text-sm text-slate-400 mt-3">
-    Across <span id="transaction-inclusion-blocks" class="mono">—</span> blocks last week,
-    <span id="transaction-inclusion-predictable" class="mono">—</span> were mined by pools whose
-    block contents closely matched the public mempool. Lower match rates can indicate
-    transaction filtering, private fee deals, or alternative inclusion policies.
-  </p>
-</article>
-
-    <!-- 5. CUSTODIAL CONCENTRATION -->
     <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition flex flex-col">
       <div class="flex items-start justify-between mb-1">
         <div>
-          <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 5 Under Construction</p>
-          <h3 class="font-semibold text-slate-200 mt-0.5">Custodial Concentration</h3>
+          <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 2</p>
+          <h3 class="font-semibold text-slate-200 mt-0.5">Security Budget</h3>
         </div>
-        <span class="text-xs px-2 py-1 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">Concern</span>
+        <span id="security-budget-badge" class="text-xs px-2 py-1 rounded bg-slate-700/30 text-slate-400 border border-slate-600/30">—</span>
       </div>
-      <p class="text-xs italic text-slate-500 mb-3">Is the asset drifting toward custodial concentration that bypasses the protocol's properties?</p>
+      <p class="text-xs italic text-slate-500 mb-3">Is total security spend adequate for what's being secured?</p>
 
-      <p class="text-3xl font-bold text-rose-400 mono">31.8%</p>
-      <p class="text-xs text-slate-500 mt-1">Supply held by top-10 custodians (ETFs, exchanges)</p>
+      <p id="security-budget-value" class="text-3xl font-bold text-slate-400 mono">—</p>
+      <p class="text-xs text-slate-500 mt-1">Annualized miner revenue ÷ market cap</p>
 
       <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
-        <path class="spark-area" fill="#fb7185" d="M0,38 L20,36 L40,34 L60,30 L80,28 L100,24 L120,22 L140,18 L160,16 L180,12 L200,10 L200,50 L0,50 Z"></path>
-        <path class="spark-path" stroke="#fb7185" d="M0,38 L20,36 L40,34 L60,30 L80,28 L100,24 L120,22 L140,18 L160,16 L180,12 L200,10"></path>
+        <path id="security-budget-spark-area" class="spark-area" fill="#94a3b8" d=""></path>
+        <path id="security-budget-spark-line" class="spark-path" stroke="#94a3b8" d=""></path>
       </svg>
 
       <p class="text-sm text-slate-400 mt-3">
-        Custodial share has risen from ~18% to ~32% in 24 months, largely ETF-driven. Self-custody as share of total supply is now at a multi-year low.
+        Attackers must outspend ~<span id="security-budget-attack-cost" class="mono">—</span>/hour and sustain it for hours or days. Security spend relative to market cap; trends downward at each halving and must be replaced by fees long-term.
       </p>
     </article>
+
+    <!-- 3. MINING DECENTRALIZATION -->
+    <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition flex flex-col">
+      <div class="flex items-start justify-between mb-1">
+        <div>
+          <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 3</p>
+          <h3 class="font-semibold text-slate-200 mt-0.5">Mining Decentralization</h3>
+        </div>
+        <span id="mining-decentralization-badge" class="text-xs px-2 py-1 rounded bg-slate-700/30 text-slate-400 border border-slate-600/30">—</span>
+      </div>
+      <p class="text-xs italic text-slate-500 mb-3">Is the security being provided still decentralized?</p>
+
+      <p id="mining-decentralization-value" class="text-3xl font-bold text-slate-400 mono">—</p>
+      <p class="text-xs text-slate-500 mt-1">HHI of mining pools (last 7 days)</p>
+
+      <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
+        <g id="mining-decentralization-bar"></g>
+      </svg>
+
+      <p id="mining-decentralization-description" class="text-sm text-slate-400 mt-3">—</p>
+    </article>
+
+    <!-- 4. TRANSACTION INCLUSION -->
+    <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition flex flex-col">
+      <div class="flex items-start justify-between mb-1">
+        <div>
+          <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 4</p>
+          <h3 class="font-semibold text-slate-200 mt-0.5">Transaction Inclusion</h3>
+        </div>
+        <span id="transaction-inclusion-badge" class="text-xs px-2 py-1 rounded bg-slate-700/30 text-slate-400 border border-slate-600/30">—</span>
+      </div>
+      <p class="text-xs italic text-slate-500 mb-3">Are transactions reliably mined regardless of who sends them?</p>
+
+      <p id="transaction-inclusion-value" class="text-3xl font-bold text-slate-400 mono">—</p>
+      <p class="text-xs text-slate-500 mt-1">Weighted block-template match rate (last 7 days)</p>
+
+      <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
+        <g id="transaction-inclusion-bars"></g>
+      </svg>
+
+      <p class="text-sm text-slate-400 mt-3">
+        Across <span id="transaction-inclusion-blocks" class="mono">—</span> blocks last week,
+        <span id="transaction-inclusion-predictable" class="mono">—</span> were mined by pools whose
+        block contents closely matched the public mempool. Lower match rates can indicate
+        transaction filtering, private fee deals, or alternative inclusion policies.
+      </p>
+    </article>
+
+   <!-- 5. CUSTODIAL CONCENTRATION -->
+<article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition flex flex-col">
+  <div class="flex items-start justify-between mb-1">
+    <div>
+      <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 5</p>
+      <h3 class="font-semibold text-slate-200 mt-0.5">Custodial Concentration</h3>
+    </div>
+    <span id="custodial-concentration-badge" class="text-xs px-2 py-1 rounded bg-slate-800 text-slate-400 border border-slate-700" style="opacity:0.6">—</span>
+  </div>
+  <p class="text-xs italic text-slate-500 mb-3">Is custody concentrating into a small number of intermediaries that could be coerced or compromised?</p>
+
+  <p id="custodial-concentration-value" class="text-3xl font-bold text-slate-400 mono">—</p>
+  <p id="custodial-concentration-subtitle" class="text-xs text-slate-500 mt-1">Supply held by tracked treasuries &amp; funds</p>
+
+  <p class="text-sm text-slate-400 mt-3">
+    Tracked institutional holdings have grown sharply since the January 2024 launch of US spot Bitcoin ETFs, driven by ETF inflows and corporate treasury accumulation (notably Strategy). This figure covers publicly-disclosed treasuries and tracked funds; exchange custody adds a further substantial share. Concentrated custody re-introduces the trusted-third-party risk Bitcoin was designed to remove: holdings can be frozen, seized, or rehypothecated by intermediaries.
+  </p>
+</article>
 
     <!-- 6. NODE SOFTWARE DIVERSITY -->
     <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition flex flex-col">
@@ -253,7 +248,7 @@
 <footer class="border-t border-slate-800 mt-10">
   <div class="max-w-6xl mx-auto px-4 py-6 text-xs text-slate-500 flex flex-col sm:flex-row sm:justify-between gap-2">
     <span>© 2026 BTC Integrity Monitor</span>
-    <span class="mono">Prototype — Indicator 1,2,3 and 4 connected to live date. Indicator 5 and 6 not connected to live data</span>
+    <span class="mono">Prototype — Indicators 1, 2, 3, 4 and 5 connected to live data. Indicators 6 not connected to live data.</span>
   </div>
 </footer>
 
