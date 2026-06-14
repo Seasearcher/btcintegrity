@@ -1,104 +1,75 @@
-// Indicator 6: Node Software Diversity
-// Source: Bitnodes (https://bitnodes.io/api/v1/snapshots/latest/)
-// Measures: distribution of node implementations among reachable nodes
-
-const STATUS = {
-  HEALTHY: {
-    label: 'Healthy',
-    classes: 'text-xs px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
-    valueColor: 'text-emerald-400',
-  },
-  WATCH: {
-    label: 'Watch',
-    classes: 'text-xs px-2 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20',
-    valueColor: 'text-amber-400',
-  },
-  CONCERN: {
-    label: 'Concern',
-    classes: 'text-xs px-2 py-1 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20',
-    valueColor: 'text-rose-400',
-  },
-};
-
-// Classify a Bitnodes user_agent string into one of three buckets.
-// Order matters: Knots advertises itself with a Satoshi-prefix too,
-// so we have to test for "knots" first.
-function classify(userAgent) {
-  if (!userAgent) return 'other';
-  const ua = userAgent.toLowerCase();
-  if (ua.includes('knots')) return 'knots';
-  if (ua.startsWith('/satoshi:')) return 'core';
-  return 'other';
-}
-
-// Status thresholds:
-//   - Heavy monoculture (Core ≥ 95%) → Watch
-//   - A non-Core implementation gaining ≥ 30% share → Watch (consensus-split risk)
-//   - A non-Core implementation ≥ 50% → Concern
-//   - Otherwise → Healthy
-function getStatus(corePct, knotsPct, otherPct) {
-  const largestNonCore = Math.max(knotsPct, otherPct);
-  if (largestNonCore >= 50) return STATUS.CONCERN;
-  if (largestNonCore >= 30) return STATUS.WATCH;
-  if (corePct >= 95)        return STATUS.WATCH;
-  return STATUS.HEALTHY;
-}
+// node-diversity.js
+const ENDPOINT = 'https://bitaccelerate.net/api/nodes-clients.json';
 
 export async function updateNodeDiversity() {
+  const valueEl    = document.getElementById('node-diversity-value');
+  const subtitleEl = document.getElementById('node-diversity-subtitle');
+  const badgeEl    = document.getElementById('node-diversity-badge');
+  const barCore    = document.getElementById('node-diversity-bar-core');
+  const barKnots   = document.getElementById('node-diversity-bar-knots');
+  const barOther   = document.getElementById('node-diversity-bar-other');
+
   try {
-    const res = await fetch('https://bitnodes.io/api/v1/snapshots/latest/');
-    if (!res.ok) throw new Error('Bitnodes API error: ' + res.status);
-    const data = await res.json();
+    const res = await fetch(ENDPOINT);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
 
-    const nodes = data.nodes || {};
-    let core = 0, knots = 0, other = 0, total = 0;
-
-    for (const key in nodes) {
-      // nodes[key] is an array; index 1 is the user_agent string.
-      const userAgent = nodes[key][1];
-      const cls = classify(userAgent);
-      if      (cls === 'core')  core++;
-      else if (cls === 'knots') knots++;
-      else                      other++;
-      total++;
+    const { labels, data, meta } = json;
+    if (!Array.isArray(labels) || !Array.isArray(data) || labels.length !== data.length) {
+      throw new Error('Unexpected response shape');
     }
 
-    if (total === 0) throw new Error('No nodes returned');
+    const counts = Object.fromEntries(labels.map((l, i) => [l, data[i]]));
+    const total = data.reduce((a, b) => a + b, 0);
+    if (total === 0) throw new Error('Empty snapshot');
 
-    const corePct  = (core  / total) * 100;
-    const knotsPct = (knots / total) * 100;
-    const otherPct = (other / total) * 100;
+    const core  = counts['Bitcoin Core']  ?? 0;
+    const knots = counts['Bitcoin Knots'] ?? 0;
+    const other = total - core - knots; // includes Unknown + minor implementations
 
-    const status = getStatus(corePct, knotsPct, otherPct);
+    const pct = n => (n / total) * 100;
+    const corePct  = pct(core);
+    const knotsPct = pct(knots);
+    const otherPct = pct(other);
 
-    // --- Headline number ---
-    const valueEl = document.getElementById('node-diversity-value');
+    barCore.style.width  = corePct.toFixed(2)  + '%';
+    barKnots.style.width = knotsPct.toFixed(2) + '%';
+    barOther.style.width = otherPct.toFixed(2) + '%';
+
     valueEl.textContent =
-      `${Math.round(corePct)} / ${Math.round(knotsPct)} / ${Math.round(otherPct)}`;
-    valueEl.className = 'text-3xl font-bold mono ' + status.valueColor;
+      `${corePct.toFixed(1)}% / ${knotsPct.toFixed(1)}% / ${otherPct.toFixed(1)}%`;
+    valueEl.classList.remove('text-slate-400');
+    valueEl.classList.add('text-slate-100');
 
-    // --- Badge ---
-    const badge = document.getElementById('node-diversity-badge');
-    badge.textContent = status.label;
-    badge.className = status.classes;
+    const ageHrs = meta?.timestamp
+      ? ((Date.now() / 1000 - meta.timestamp) / 3600).toFixed(1)
+      : null;
+    subtitleEl.textContent =
+      `${total.toLocaleString()} listening nodes` +
+      (ageHrs ? ` · updated ${ageHrs}h ago` : '');
 
-    // --- Subtitle with sample size ---
-    document.getElementById('node-diversity-subtitle').textContent =
-      `Core / Knots / Other (% of ${total.toLocaleString()} reachable nodes)`;
-
-    // --- Stacked bar widths ---
-    document.getElementById('node-diversity-bar-core').style.width  = corePct.toFixed(2)  + '%';
-    document.getElementById('node-diversity-bar-knots').style.width = knotsPct.toFixed(2) + '%';
-    document.getElementById('node-diversity-bar-other').style.width = otherPct.toFixed(2) + '%';
+    let badgeText, badgeClass;
+    if (corePct > 90 || knotsPct > 90) {
+      badgeText = 'Concentrated';
+      badgeClass = 'bg-red-500/20 text-red-300 border-red-500/40';
+    } else if (knotsPct > 20 || corePct < 70) {
+      badgeText = 'Watch';
+      badgeClass = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
+    } else {
+      badgeText = 'Healthy';
+      badgeClass = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
+    }
+    badgeEl.textContent = badgeText;
+    badgeEl.className = 'text-xs px-2 py-1 rounded border ' + badgeClass;
 
     console.log(
-      `✅ Node Software Diversity: ${corePct.toFixed(1)}% / ${knotsPct.toFixed(1)}% / ${otherPct.toFixed(1)}% ` +
-      `(${status.label}) — ${total} reachable nodes`
+      `✅ Node Software Diversity: Core ${corePct.toFixed(1)}% / ` +
+      `Knots ${knotsPct.toFixed(1)}% / Other ${otherPct.toFixed(1)}% — ${badgeText}`
     );
-
   } catch (err) {
-    console.error('⚠️ Node Software Diversity indicator failed:', err);
-    const v = document.getElementById('node-diversity-value');
-    if (v) v.textContent = '—';
+    console.error('Node Software Diversity indicator failed:', err);
+    valueEl.textContent    = '—';
+    subtitleEl.textContent = 'Data source unavailable';
+    badgeEl.textContent    = '—';
   }
 }
