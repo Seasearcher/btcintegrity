@@ -1,4 +1,163 @@
-<!-- 5. CUSTODIAL CONCENTRATION -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BTC Integrity Monitor</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+  .spark-path { fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+  .spark-area { opacity: 0.15; }
+</style>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+
+<!-- HEADER -->
+<header class="border-b border-slate-800">
+  <div class="max-w-6xl mx-auto px-4 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight">BTC Integrity Monitor</h1>
+      <p class="text-sm text-slate-400 mt-1">An independent dashboard tracking the structural health of the Bitcoin network</p>
+    </div>
+    <div class="flex items-center gap-3 text-sm">
+      <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      <span id="last-updated" class="text-slate-300 mono">Last updated: —</span>
+    </div>
+  </div>
+</header>
+
+<!-- COMPOSITE STATUS -->
+<section class="max-w-6xl mx-auto px-4 py-10">
+  <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+      <div>
+        <p class="text-xs uppercase tracking-widest text-slate-400 mb-2">Composite Integrity Score</p>
+        <div class="flex items-baseline gap-3">
+          <span class="text-6xl font-bold text-amber-400">71</span>
+          <span class="text-2xl text-slate-500 mono">/ 100</span>
+        </div>
+        <p class="text-slate-300 mt-3 max-w-md">
+          Network integrity is currently <span class="text-amber-400 font-semibold">moderate</span>.
+          Fee-market maturity and custodial concentration are the main downward pressures.
+        </p>
+      </div>
+      <div class="w-full md:w-64">
+        <div class="h-3 bg-slate-800 rounded-full overflow-hidden">
+          <div class="h-full bg-gradient-to-r from-rose-500 via-amber-400 to-emerald-400" style="width: 71%"></div>
+        </div>
+        <div class="flex justify-between text-xs text-slate-500 mt-2 mono">
+          <span>0 — Critical</span>
+          <span>100 — Robust</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INDICATORS GRID -->
+<section class="max-w-6xl mx-auto px-4 pb-10">
+  <h2 class="text-lg font-semibold mb-6 text-slate-200">Indicators</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+    <!-- 1. FEE MARKET MATURITY -->
+    <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition flex flex-col">
+      <div class="flex items-start justify-between mb-1">
+        <div>
+          <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 1</p>
+          <h3 class="font-semibold text-slate-200 mt-0.5">Fee Market Maturity</h3>
+        </div>
+        <span id="fee-market-badge" class="text-xs px-2 py-1 rounded bg-slate-700/30 text-slate-400 border border-slate-600/30">—</span>
+      </div>
+      <p class="text-xs italic text-slate-500 mb-3">Is the fee market maturing on schedule?</p>
+
+      <p id="fee-market-value" class="text-3xl font-bold text-slate-400 mono">—</p>
+      <p class="text-xs text-slate-500 mt-1">Fees as share of total block reward in BTC (90d avg)</p>
+
+      <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
+        <path id="fee-market-spark-area" class="spark-area" fill="#94a3b8" d=""></path>
+        <path id="fee-market-spark-line" class="spark-path" stroke="#94a3b8" d=""></path>
+      </svg>
+
+      <p class="text-sm text-slate-400 mt-3">
+        The share of miner revenue derived from transaction fees rather than the block subsidy, measured in BTC. Relevant because the subsidy halves every four years and trends toward zero.
+      </p>
+    </article>
+
+    <!-- 2. SECURITY BUDGET -->
+    <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition flex flex-col">
+      <div class="flex items-start justify-between mb-1">
+        <div>
+          <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 2</p>
+          <h3 class="font-semibold text-slate-200 mt-0.5">Security Budget</h3>
+        </div>
+        <span id="security-budget-badge" class="text-xs px-2 py-1 rounded bg-slate-700/30 text-slate-400 border border-slate-600/30">—</span>
+      </div>
+      <p class="text-xs italic text-slate-500 mb-3">Is total security spend adequate for what's being secured?</p>
+
+      <p id="security-budget-value" class="text-3xl font-bold text-slate-400 mono">—</p>
+      <p class="text-xs text-slate-500 mt-1">Annualized miner revenue ÷ market cap</p>
+
+      <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
+        <path id="security-budget-spark-area" class="spark-area" fill="#94a3b8" d=""></path>
+        <path id="security-budget-spark-line" class="spark-path" stroke="#94a3b8" d=""></path>
+      </svg>
+
+      <p class="text-sm text-slate-400 mt-3">
+        Attackers must outspend ~<span id="security-budget-attack-cost" class="mono">—</span>/hour and sustain it for hours or days. Security spend relative to market cap; trends downward at each halving and must be replaced by fees long-term.
+      </p>
+    </article>
+
+    <!-- 3. MINING DECENTRALIZATION -->
+    <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition flex flex-col">
+      <div class="flex items-start justify-between mb-1">
+        <div>
+          <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 3</p>
+          <h3 class="font-semibold text-slate-200 mt-0.5">Mining Decentralization</h3>
+        </div>
+        <span id="mining-decentralization-badge" class="text-xs px-2 py-1 rounded bg-slate-700/30 text-slate-400 border border-slate-600/30">—</span>
+      </div>
+      <p class="text-xs italic text-slate-500 mb-3">Is the security being provided still decentralized?</p>
+
+      <p id="mining-decentralization-value" class="text-3xl font-bold text-slate-400 mono">—</p>
+      <p class="text-xs text-slate-500 mt-1">HHI of mining pools (last 7 days)</p>
+
+      <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
+        <g id="mining-decentralization-bar"></g>
+      </svg>
+
+      <p id="mining-decentralization-description" class="text-sm text-slate-400 mt-3">—</p>
+    </article>
+
+    <!-- 4. TRANSACTION INCLUSION -->
+    <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition flex flex-col">
+      <div class="flex items-start justify-between mb-1">
+        <div>
+          <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 4</p>
+          <h3 class="font-semibold text-slate-200 mt-0.5">Transaction Inclusion</h3>
+        </div>
+        <span id="transaction-inclusion-badge" class="text-xs px-2 py-1 rounded bg-slate-700/30 text-slate-400 border border-slate-600/30">—</span>
+      </div>
+      <p class="text-xs italic text-slate-500 mb-3">Are transactions reliably mined regardless of who sends them?</p>
+
+      <p id="transaction-inclusion-value" class="text-3xl font-bold text-slate-400 mono">—</p>
+      <p class="text-xs text-slate-500 mt-1">Weighted block-template match rate (last 7 days)</p>
+
+      <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
+        <g id="transaction-inclusion-bars"></g>
+      </svg>
+
+      <p class="text-sm text-slate-400 mt-3">
+        Across <span id="transaction-inclusion-blocks" class="mono">—</span> blocks last week,
+        <span id="transaction-inclusion-predictable" class="mono">—</span> were mined by pools whose
+        block contents closely matched the public mempool. Lower match rates can indicate
+        transaction filtering, private fee deals, or alternative inclusion policies.
+      </p>
+    </article>
+
+    <!-- 5. CUSTODIAL CONCENTRATION -->
 <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition flex flex-col">
   <div class="flex items-start justify-between mb-1">
     <div>
@@ -16,3 +175,84 @@
     Custodial share has roughly doubled since the January 2024 launch of US spot Bitcoin ETFs, driven by ETF inflows, corporate treasury accumulation (notably Strategy), and persistent exchange balances. Self-custody as a share of circulating supply is at multi-year lows. Concentrated custody re-introduces the trusted-third-party risk Bitcoin was designed to remove: holdings can be frozen, seized, or rehypothecated by intermediaries.
   </p>
 </article>
+
+    <!-- 6. NODE SOFTWARE DIVERSITY -->
+    <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition flex flex-col">
+      <div class="flex items-start justify-between mb-1">
+        <div>
+          <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 6 Under Construction</p>
+          <h3 class="font-semibold text-slate-200 mt-0.5">Node Software Diversity</h3>
+        </div>
+        <span class="text-xs px-2 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">Watch</span>
+      </div>
+      <p class="text-xs italic text-slate-500 mb-3">What is the level of node implementation diversity?</p>
+
+      <p class="text-3xl font-bold text-amber-400 mono">86 / 12 / 2</p>
+      <p class="text-xs text-slate-500 mt-1">Core / Knots / Other (% of reachable nodes)</p>
+
+      <div class="mt-3 h-3 w-full rounded-full overflow-hidden bg-slate-800 flex">
+        <div class="bg-orange-400" style="width: 86%"></div>
+        <div class="bg-purple-400" style="width: 12%"></div>
+        <div class="bg-slate-500" style="width: 2%"></div>
+      </div>
+      <div class="flex flex-wrap gap-3 text-xs text-slate-400 mt-2">
+        <span class="flex items-center gap-1.5"><span class="inline-block w-2 h-2 rounded-sm bg-orange-400"></span>Core</span>
+        <span class="flex items-center gap-1.5"><span class="inline-block w-2 h-2 rounded-sm bg-purple-400"></span>Knots</span>
+        <span class="flex items-center gap-1.5"><span class="inline-block w-2 h-2 rounded-sm bg-slate-500"></span>Other</span>
+      </div>
+
+      <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
+        <path class="spark-area" fill="#c084fc" d="M0,44 L20,43 L40,42 L60,40 L80,38 L100,34 L120,30 L140,26 L160,22 L180,18 L200,15 L200,50 L0,50 Z"></path>
+        <path class="spark-path" stroke="#c084fc" d="M0,44 L20,43 L40,42 L60,40 L80,38 L100,34 L120,30 L140,26 L160,22 L180,18 L200,15"></path>
+      </svg>
+
+      <p class="text-sm text-slate-400 mt-3">
+        Knots share has grown from ~2% (early 2024) to ~12%. Rising diversity reduces monoculture risk, but divergent relay policies between implementations can fragment mempool propagation.
+      </p>
+    </article>
+
+  </div>
+</section>
+
+<!-- METHODOLOGY -->
+<section class="max-w-6xl mx-auto px-4 py-10 border-t border-slate-800">
+  <h2 class="text-lg font-semibold mb-4 text-slate-200">Methodology</h2>
+  <div class="text-slate-300 space-y-4 text-sm leading-relaxed max-w-4xl">
+    <p>
+      The Composite Integrity Score is a weighted average of all six indicators, each normalized to a 0–100 scale against historical baselines and thresholds drawn from peer-reviewed literature (Budish 2018, Carlsten et al. 2016, Eyal &amp; Sirer 2014, Heilman et al. 2015, among others).
+    </p>
+    <p>
+      <span class="font-semibold text-slate-100">Indicators 1 &amp; 2</span> measure the economic sustainability of proof-of-work: whether fees can replace the diminishing block subsidy, and whether total security spend remains proportional to value at risk.
+    </p>
+    <p>
+      <span class="font-semibold text-slate-100">Indicators 3 &amp; 4</span> measure structural and behavioral decentralization: who can produce blocks, and whether that production is being used to censor.
+    </p>
+    <p>
+      <span class="font-semibold text-slate-100">Indicators 5 &amp; 6</span> measure off-chain capture and software monoculture — two ways the protocol's properties can be effectively bypassed even while the chain itself appears healthy.
+    </p>
+    <p>
+      All raw data, calculation code, and historical snapshots are published openly. This project accepts no funding from mining pools, exchanges, custodians, or wallet providers, and takes no position on which node implementation users should run.
+    </p>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="max-w-6xl mx-auto px-4 py-10 border-t border-slate-800">
+  <h2 class="text-lg font-semibold mb-4 text-slate-200">About</h2>
+  <p class="text-slate-300 text-sm leading-relaxed max-w-3xl">
+    BTC Integrity Monitor is an independent, non-commercial project that tracks measurable properties of the Bitcoin network relevant to its long-term integrity: economic sustainability, decentralization, censorship-resistance, custodial dispersion, and implementation diversity. This is not investment advice.
+  </p>
+</section>
+
+<!-- FOOTER -->
+<footer class="border-t border-slate-800 mt-10">
+  <div class="max-w-6xl mx-auto px-4 py-6 text-xs text-slate-500 flex flex-col sm:flex-row sm:justify-between gap-2">
+    <span>© 2026 BTC Integrity Monitor</span>
+    <span class="mono">Prototype — Indicators 1, 2, 3, and 4 connected to live data. Indicators 5 and 6 not connected to live data.</span>
+  </div>
+</footer>
+
+<script type="module" src="js/main.js"></script>
+
+</body>
+</html>
