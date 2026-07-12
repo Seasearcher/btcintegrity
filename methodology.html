@@ -20,7 +20,10 @@
       <h1 class="text-2xl font-bold tracking-tight">Methodology</h1>
       <p class="text-sm text-slate-400 mt-1">Data sources, anchor calibration, and how the Composite Integrity Score is calculated</p>
     </div>
-    <a href="index.html" class="text-sm text-slate-300 hover:text-slate-100 transition mono">← Back to dashboard</a>
+    <div class="flex items-center gap-4">
+      <a href="https://github.com/seasearcher/btcintegrity" target="_blank" rel="noopener" class="text-sm text-slate-300 hover:text-slate-100 transition mono">GitHub ↗</a>
+      <a href="index.html" class="text-sm text-slate-300 hover:text-slate-100 transition mono">← Back to dashboard</a>
+    </div>
   </div>
 </header>
 
@@ -39,6 +42,23 @@
     <p>
       All data is fetched client-side in your browser — there is no backend, and no adjustment
       or smoothing is applied beyond what is described on this page.
+    </p>
+  </div>
+</section>
+
+<!-- ABOUT THIS PROJECT -->
+<section class="max-w-6xl mx-auto px-4 pb-10">
+  <h2 class="text-lg font-semibold mb-4 text-slate-200">About This Project</h2>
+  <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 max-w-4xl">
+    <p class="text-sm text-slate-300 leading-relaxed">
+      A personal note upfront: I'm not a Bitcoin expert. I built this dashboard because I wanted
+      a better feel for the structural health of the network myself, beyond price charts and
+      headlines — and figured others might find it useful too. The methodology was developed
+      with substantial help from AI, drawing on published research on Bitcoin's security
+      economics. That's exactly why everything here is open source and documented in detail:
+      I <em>want</em> the calibration, the data handling, and the assumptions to be checked by
+      people who know more than I do. If you spot something wrong, please open an issue on
+      <a href="https://github.com/seasearcher/btcintegrity" target="_blank" rel="noopener" class="text-slate-100 hover:underline font-semibold">GitHub</a>.
     </p>
   </div>
 </section>
@@ -375,8 +395,9 @@
       Anchor values and status thresholds are calibrated against historical ranges and current-era
       network conditions, and are reviewed periodically. Several indicators measure only what is
       publicly observable — tracked treasuries, attributed pool blocks, listening nodes — and may
-      understate the underlying phenomenon. The score is an informational heuristic, not financial
-      advice.
+      understate the underlying phenomenon. This is a hobby project by a non-expert, built with
+      AI assistance — treat the outputs accordingly and verify anything you rely on. The score is
+      an informational heuristic, not financial advice.
     </p>
   </div>
 </section>
@@ -384,7 +405,7 @@
 <!-- FOOTER -->
 <footer class="border-t border-slate-800 mt-10">
   <div class="max-w-6xl mx-auto px-4 py-6 text-xs text-slate-500 flex flex-col sm:flex-row sm:justify-between gap-2">
-    <span>© 2026 BTC Integrity Monitor</span>
+    <span>© 2026 BTC Integrity Monitor · <a href="https://github.com/seasearcher/btcintegrity" target="_blank" rel="noopener" class="hover:text-slate-300 transition">Source on GitHub</a></span>
     <span class="mono">All indicators and the composite score are computed live in-browser from public APIs.</span>
   </div>
 </footer>
