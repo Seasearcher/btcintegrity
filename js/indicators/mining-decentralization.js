@@ -1,8 +1,38 @@
+// Indicator 3: Mining Decentralization
+// Source: mempool.space pool share data (1w window)
+// Measures: HHI of pool block shares + Nakamoto coefficient
+
+import { fetchJSON }        from '../utils/fetch-cache.js';
+import { scoreFromAnchors } from '../utils/normalize.js';
+import { MEMPOOL_POOLS_1W } from '../utils/endpoints.js';
+
+// Composite-score anchors. The badge uses OR logic across HHI and the
+// Nakamoto coefficient; the composite preserves the same weakest-link
+// semantics by taking the MINIMUM of the two sub-scores.
+//
+// HHI (lower is better): Healthy boundary (0.15) → 80, Concern boundary (0.25) → 60.
+const HHI_ANCHORS = [
+  [0.05, 100],
+  [0.15, 80],
+  [0.25, 60],
+  [0.6,  0],
+];
+
+// Nakamoto coefficient (higher is better): ≤2 is Concern, 3 is Watch.
+const NAKAMOTO_ANCHORS = [
+  [1, 0],
+  [2, 30],
+  [3, 65],
+  [4, 80],
+  [6, 100],
+];
+
 export async function updateMiningDecentralization() {
+  const valueEl = document.getElementById('mining-decentralization-value');
+  const badge   = document.getElementById('mining-decentralization-badge');
+
   try {
-    const res = await fetch('https://mempool.space/api/v1/mining/pools/1w');
-    if (!res.ok) throw new Error('mempool.space API error: ' + res.status);
-    const data = await res.json();
+    const data = await fetchJSON(MEMPOOL_POOLS_1W);
 
     const pools = (data.pools || []).filter(p => p.slug !== 'unknown');
     if (pools.length === 0) throw new Error('No pool data returned');
@@ -52,13 +82,16 @@ export async function updateMiningDecentralization() {
     }
 
     // --- DOM updates ---
-    const valueEl = document.getElementById('mining-decentralization-value');
-    valueEl.textContent = hhi.toFixed(3);
-    valueEl.className = 'text-3xl font-bold mono ' + valueColor;
+    if (valueEl) {
+      valueEl.textContent = hhi.toFixed(3);
+      valueEl.className = 'text-3xl font-bold mono ' + valueColor;
+    }
 
-    const badge = document.getElementById('mining-decentralization-badge');
-    badge.textContent = label;
-    badge.className = badgeClasses;
+    if (badge) {
+      badge.textContent = label;
+      badge.className = badgeClasses;
+      badge.style.opacity = '1';
+    }
 
     // --- Description ---
     const topNames = shares.slice(0, nakamoto).map(p => p.name);
@@ -72,15 +105,38 @@ export async function updateMiningDecentralization() {
   `<strong>${(top50Share * 100).toFixed(1)}%</strong> of blocks over the last week. ` +
   `Template-provider concentration may be higher than visible pool shares suggest.`;
 
-    document.getElementById('mining-decentralization-description').innerHTML = desc;
+    const descEl = document.getElementById('mining-decentralization-description');
+    if (descEl) descEl.innerHTML = desc;
 
     // --- Stacked share bar ---
     drawShareBar(shares, barAccent, nakamoto);
 
+    // --- Composite score: weakest link of the two sub-metrics ---
+    const hhiScore      = scoreFromAnchors(hhi, HHI_ANCHORS);
+    const nakamotoScore = scoreFromAnchors(nakamoto, NAKAMOTO_ANCHORS);
+    const score         = Math.min(hhiScore, nakamotoScore);
+
+    console.log(
+      `✅ Mining Decentralization: HHI ${hhi.toFixed(3)}, Nakamoto ${nakamoto} ` +
+      `(${label}, score ${Math.round(score)} = min(${Math.round(hhiScore)}, ${Math.round(nakamotoScore)}))`
+    );
+
+    return {
+      key:   'miningDecentralization',
+      label: 'mining decentralization',
+      raw:   { hhi, nakamoto },
+      score,
+      status: label,
+    };
+
   } catch (err) {
-    console.error('Mining Decentralization indicator failed:', err);
-    const v = document.getElementById('mining-decentralization-value');
-    if (v) v.textContent = '—';
+    console.error('⚠️ Mining Decentralization indicator failed:', err);
+    if (valueEl) valueEl.textContent = '—';
+    if (badge) {
+      badge.title         = 'Live data unavailable';
+      badge.style.opacity = '0.6';
+    }
+    throw err; // re-throw so main.js and the composite see the failure
   }
 }
 
