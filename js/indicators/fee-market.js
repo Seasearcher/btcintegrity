@@ -11,7 +11,9 @@
 // Fee shares typically run 0.3%-2% in normal conditions, with spikes during
 // congestion (ordinals, runes, mempool backlogs) reaching 5-10%+.
 
-import { renderSparkline } from '../utils/sparkline.js';
+import { renderSparkline }  from '../utils/sparkline.js';
+import { fetchJSON }        from '../utils/fetch-cache.js';
+import { scoreFromAnchors } from '../utils/normalize.js';
 
 const ENDPOINTS = {
   fees:    'https://mempool.space/api/v1/mining/blocks/fees/3m',
@@ -25,6 +27,15 @@ const THRESHOLDS = {
   watch:   0.5,  // 0.5-2%  = normal baseline, worth watching
   // < 0.5%        = concern, near subsidy-only economy
 };
+
+// Composite-score anchors: [fee share %, score].
+// Aligned with THRESHOLDS: Watch boundary → 60, Healthy boundary → 80.
+const ANCHORS = [
+  [0,   0],
+  [0.5, 60],   // = THRESHOLDS.watch
+  [2,   80],   // = THRESHOLDS.healthy
+  [5,   100],
+];
 
 // Smoothing window for the sparkline (in buckets).
 // Higher = smoother trend, lower = more responsive to spikes.
@@ -74,17 +85,10 @@ export async function updateFeeMarket() {
   }
 
   try {
-    const [feesRes, rewardsRes] = await Promise.all([
-      fetch(ENDPOINTS.fees),
-      fetch(ENDPOINTS.rewards),
+    const [feesData, rewardsData] = await Promise.all([
+      fetchJSON(ENDPOINTS.fees),
+      fetchJSON(ENDPOINTS.rewards),
     ]);
-
-    if (!feesRes.ok || !rewardsRes.ok) {
-      throw new Error('mempool.space API returned non-OK status');
-    }
-
-    const feesData    = await feesRes.json();
-    const rewardsData = await rewardsRes.json();
 
     if (!feesData.length || !rewardsData.length) {
       throw new Error('mempool.space API returned empty data');
@@ -148,10 +152,20 @@ export async function updateFeeMarket() {
       color:  styles.sparkColor,
     });
 
+    const score = scoreFromAnchors(feeShare, ANCHORS);
+
     console.log(
-      `✅ Fee Market: ${feeShare.toFixed(2)}% (${status}) ` +
+      `✅ Fee Market: ${feeShare.toFixed(2)}% (${status}, score ${Math.round(score)}) ` +
       `— ${feesData.length} buckets, smoothed window=${SMOOTHING_WINDOW}`
     );
+
+    return {
+      key:   'feeMarket',
+      label: 'fee-market maturity',
+      raw:   feeShare,
+      score,
+      status,
+    };
 
   } catch (err) {
     console.error('⚠️ Fee Market update failed:', err);
