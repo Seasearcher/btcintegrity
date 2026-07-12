@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Methodology — BTC Integrity Monitor</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+</style>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+
+<!-- HEADER -->
+<header class="border-b border-slate-800">
+  <div class="max-w-6xl mx-auto px-4 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight">Methodology</h1>
+      <p class="text-sm text-slate-400 mt-1">Data sources, anchor calibration, and how the Composite Integrity Score is calculated</p>
+    </div>
+    <a href="index.html" class="text-sm text-slate-300 hover:text-slate-100 transition mono">← Back to dashboard</a>
+  </div>
+</header>
+
+<!-- OVERVIEW -->
+<section class="max-w-6xl mx-auto px-4 py-10">
+  <h2 class="text-lg font-semibold mb-4 text-slate-200">Overview</h2>
+  <div class="text-slate-300 space-y-4 text-sm leading-relaxed max-w-4xl">
+    <p>
+      The Composite Integrity Score combines six live indicators, each measuring a different
+      aspect of Bitcoin's structural health: fee-market maturity, the security budget, mining
+      decentralization, transaction inclusion, custodial concentration, and node software
+      diversity. Every indicator is fetched from a public API, converted to a 0–100 sub-score
+      by interpolation between fixed anchor points, and combined into a single weighted score
+      with weakest-link semantics.
+    </p>
+    <p>
+      All data is fetched client-side in your browser — there is no backend, and no adjustment
+      or smoothing is applied beyond what is described on this page.
+    </p>
+  </div>
+</section>
+
+<!-- DATA SOURCES -->
+<section class="max-w-6xl mx-auto px-4 pb-10">
+  <h2 class="text-lg font-semibold mb-4 text-slate-200">Data Sources</h2>
+  <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-slate-800 text-left">
+            <th class="px-5 py-3 text-xs uppercase tracking-wider text-slate-500 font-semibold">Source</th>
+            <th class="px-5 py-3 text-xs uppercase tracking-wider text-slate-500 font-semibold">Used for</th>
+            <th class="px-5 py-3 text-xs uppercase tracking-wider text-slate-500 font-semibold">Window</th>
+          </tr>
+        </thead>
+        <tbody class="text-slate-300">
+          <tr class="border-b border-slate-800/60">
+            <td class="px-5 py-3 align-top"><a href="https://mempool.space" target="_blank" rel="noopener" class="text-slate-100 hover:underline">mempool.space</a></td>
+            <td class="px-5 py-3 align-top text-slate-400">Block fees &amp; rewards (Fee Market); mining-pool shares and block-template match rates (Mining Decentralization, Transaction Inclusion)</td>
+            <td class="px-5 py-3 align-top mono text-slate-400">3m / 1w</td>
+          </tr>
+          <tr class="border-b border-slate-800/60">
+            <td class="px-5 py-3 align-top"><a href="https://www.coingecko.com" target="_blank" rel="noopener" class="text-slate-100 hover:underline">CoinGecko</a></td>
+            <td class="px-5 py-3 align-top text-slate-400">Market cap and circulating supply; public-company &amp; fund treasury holdings (Security Budget, Custodial Concentration)</td>
+            <td class="px-5 py-3 align-top mono text-slate-400">snapshot</td>
+          </tr>
+          <tr class="border-b border-slate-800/60">
+            <td class="px-5 py-3 align-top"><a href="https://blockchain.info" target="_blank" rel="noopener" class="text-slate-100 hover:underline">blockchain.info</a></td>
+            <td class="px-5 py-3 align-top text-slate-400">Miner revenue in USD (Security Budget)</td>
+            <td class="px-5 py-3 align-top mono text-slate-400">30d avg (1y trend)</td>
+          </tr>
+          <tr>
+            <td class="px-5 py-3 align-top text-slate-100">bitaccelerate.net</td>
+            <td class="px-5 py-3 align-top text-slate-400">Listening-node client software snapshot (Node Software Diversity)</td>
+            <td class="px-5 py-3 align-top mono text-slate-400">latest snapshot</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <p class="text-sm text-slate-400 mt-4 max-w-4xl leading-relaxed">
+    All data is fetched on page load. Requests are deduplicated and cached in-browser, so indicators
+    sharing an endpoint — such as Mining Decentralization and Transaction Inclusion, which both use
+    the same weekly pool data — trigger only a single API call.
+  </p>
+</section>
+
+<!-- NORMALIZATION -->
+<section class="max-w-6xl mx-auto px-4 pb-10">
+  <h2 class="text-lg font-semibold mb-4 text-slate-200">Normalization</h2>
+  <div class="text-slate-300 space-y-4 text-sm leading-relaxed max-w-4xl">
+    <p>
+      Each raw indicator value is converted to a 0–100 sub-score by
+      <span class="font-semibold text-slate-100">piecewise-linear interpolation</span> between
+      fixed anchor points. Each anchor pairs a raw value with a score; values between two anchors
+      are scaled linearly, and values outside the anchor range are clamped to the first or last
+      anchor's score.
+    </p>
+    <div class="bg-slate-900 border border-slate-800 rounded-xl px-5 py-4 mono text-xs text-slate-300 overflow-x-auto">
+      score = interpolate(value, anchors)&nbsp;&nbsp;<span class="text-slate-500">// linear between anchor points, clamped at the ends</span>
+    </div>
+    <p>
+      For indicators where a <em>lower</em> raw value is healthier (Custodial Concentration, Node
+      Software Diversity, and the HHI component of Mining Decentralization), the anchors are defined
+      in descending score order, so that 100 always means "healthy" and 0 always means "stressed".
+    </p>
+    <p>
+      Anchors are aligned with each indicator's status badge: the Concern-to-Watch boundary maps to
+      a sub-score of <span class="mono">60</span> and the Watch-to-Healthy boundary to
+      <span class="mono">80</span>.
+    </p>
+  </div>
+</section>
+
+<!-- INDICATORS & ANCHORS -->
+<section class="max-w-6xl mx-auto px-4 pb-10">
+  <h2 class="text-lg font-semibold mb-6 text-slate-200">Indicators &amp; Anchors</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+    <!-- 1. FEE MARKET -->
+    <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition">
+      <div class="flex items-start justify-between mb-1">
+        <div>
+          <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 1 · Pair A</p>
+          <h3 class="font-semibold text-slate-200 mt-0.5">Fee Market Maturity</h3>
+        </div>
+        <span class="text-xs px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">higher = better</span>
+      </div>
+      <p class="text-xs text-slate-500 mb-3 mono">mempool.space · 3-month window · weight 1/6</p>
+      <p class="text-sm text-slate-400 leading-relaxed">
+        Transaction fees as a share of total block reward (fees + subsidy) over the last three
+        months, in BTC. As the subsidy halves every ~4 years, security must increasingly come
+        from fees. In the current era (3.125 BTC subsidy), fee shares typically run 0.3%–2%
+        in normal conditions.
+      </p>
+      <div class="mt-3 bg-slate-950/60 border border-slate-800 rounded-lg px-4 py-3 mono text-xs text-slate-300">
+        0% → 0 &nbsp;·&nbsp; 0.5% → 60 &nbsp;·&nbsp; 2% → 80 &nbsp;·&nbsp; 5% → 100
+      </div>
+      <p class="text-xs text-slate-500 mt-2">Calibrated for the current halving era; re-tuned after each halving as fee share naturally doubles relative to subsidy.</p>
+    </article>
+
+    <!-- 2. SECURITY BUDGET -->
+    <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition">
+      <div class="flex items-start justify-between mb-1">
+        <div>
+          <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 2 · Pair A</p>
+          <h3 class="font-semibold text-slate-200 mt-0.5">Security Budget</h3>
+        </div>
+        <span class="text-xs px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">higher = better</span>
+      </div>
+      <p class="text-xs text-slate-500 mb-3 mono">blockchain.info + CoinGecko · 30-day avg · weight 1/6</p>
+      <p class="text-sm text-slate-400 leading-relaxed">
+        Annualized miner revenue (30-day average daily revenue × 365) divided by market
+        capitalization. Measures how much is spent per year securing the network relative to
+        the value being secured. The dashboard card also shows an estimated hourly attack cost
+        derived from average daily miner revenue.
+      </p>
+      <div class="mt-3 bg-slate-950/60 border border-slate-800 rounded-lg px-4 py-3 mono text-xs text-slate-300">
+        0% → 0 &nbsp;·&nbsp; 0.50% → 60 &nbsp;·&nbsp; 0.75% → 80 &nbsp;·&nbsp; 1.5% → 100
+      </div>
+    </article>
+
+    <!-- 3. MINING DECENTRALIZATION -->
+    <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition">
+      <div class="flex items-start justify-between mb-1">
+        <div>
+          <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 3 · Pair B</p>
+          <h3 class="font-semibold text-slate-200 mt-0.5">Mining Decentralization</h3>
+        </div>
+        <span class="text-xs px-2 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">min of two</span>
+      </div>
+      <p class="text-xs text-slate-500 mb-3 mono">mempool.space · 1-week window · weight 1/6</p>
+      <p class="text-sm text-slate-400 leading-relaxed">
+        Two sub-metrics over the last week of blocks (excluding unattributed "Unknown" blocks):
+        the <span class="text-slate-200">Herfindahl–Hirschman Index</span> — sum of squared pool
+        shares, lower is more distributed — and the <span class="text-slate-200">Nakamoto
+        coefficient</span> — the minimum number of pools controlling over 50% of blocks. The
+        sub-score is the <em>minimum</em> of the two, so strength in one metric cannot mask
+        weakness in the other. Template-provider concentration may be higher than visible pool
+        shares suggest.
+      </p>
+      <div class="mt-3 bg-slate-950/60 border border-slate-800 rounded-lg px-4 py-3 mono text-xs text-slate-300 space-y-1">
+        <div><span class="text-slate-500">HHI:</span> 0.05 → 100 · 0.15 → 80 · 0.25 → 60 · 0.60 → 0</div>
+        <div><span class="text-slate-500">Nakamoto:</span> 1 → 0 · 2 → 30 · 3 → 65 · 4 → 80 · 6 → 100</div>
+      </div>
+    </article>
+
+    <!-- 4. TRANSACTION INCLUSION -->
+    <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition">
+      <div class="flex items-start justify-between mb-1">
+        <div>
+          <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 4 · Pair B</p>
+          <h3 class="font-semibold text-slate-200 mt-0.5">Transaction Inclusion</h3>
+        </div>
+        <span class="text-xs px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">higher = better</span>
+      </div>
+      <p class="text-xs text-slate-500 mb-3 mono">mempool.space · 1-week window · weight 1/6</p>
+      <p class="text-sm text-slate-400 leading-relaxed">
+        The block-weighted average of how closely each pool's blocks match the expected block
+        template, over the last week. High match rates indicate pools are including transactions
+        neutrally, as fee-rate ordering predicts; sustained low rates can signal filtering,
+        private fee deals, or alternative inclusion policies. Blocks from unidentified pools are
+        excluded — precisely the blocks most likely to deviate — so treat this as an optimistic
+        bound.
+      </p>
+      <div class="mt-3 bg-slate-950/60 border border-slate-800 rounded-lg px-4 py-3 mono text-xs text-slate-300">
+        90% → 0 &nbsp;·&nbsp; 95% → 60 &nbsp;·&nbsp; 98% → 80 &nbsp;·&nbsp; 99.5% → 100
+      </div>
+    </article>
+
+    <!-- 5. CUSTODIAL CONCENTRATION -->
+    <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition">
+      <div class="flex items-start justify-between mb-1">
+        <div>
+          <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 5 · Pair C</p>
+          <h3 class="font-semibold text-slate-200 mt-0.5">Custodial Concentration</h3>
+        </div>
+        <span class="text-xs px-2 py-1 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">lower = better</span>
+      </div>
+      <p class="text-xs text-slate-500 mb-3 mono">CoinGecko · current snapshot · weight 1/6</p>
+      <p class="text-sm text-slate-400 leading-relaxed">
+        BTC held by tracked institutional custodians — publicly-disclosed corporate treasuries
+        and tracked funds — as a percentage of circulating supply. This does <em>not</em> include
+        exchange custody balances or every spot ETF, so the figure is a <span class="text-slate-200">lower
+        bound</span> on true custodial concentration; exchange custody alone is estimated to add
+        another 15–20% based on external research. Anchors are calibrated for this tracked subset
+        only.
+      </p>
+      <div class="mt-3 bg-slate-950/60 border border-slate-800 rounded-lg px-4 py-3 mono text-xs text-slate-300">
+        2% → 100 &nbsp;·&nbsp; 5% → 80 &nbsp;·&nbsp; 10% → 60 &nbsp;·&nbsp; 25% → 0
+      </div>
+    </article>
+
+    <!-- 6. NODE SOFTWARE DIVERSITY -->
+    <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition">
+      <div class="flex items-start justify-between mb-1">
+        <div>
+          <p class="text-xs uppercase tracking-wider text-slate-500">Indicator 6 · Pair C</p>
+          <h3 class="font-semibold text-slate-200 mt-0.5">Node Software Diversity</h3>
+        </div>
+        <span class="text-xs px-2 py-1 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">lower = better</span>
+      </div>
+      <p class="text-xs text-slate-500 mb-3 mono">bitaccelerate.net · latest snapshot · weight 1/6</p>
+      <p class="text-sm text-slate-400 leading-relaxed">
+        The share of listening nodes running the single most dominant client implementation
+        (currently the larger of Bitcoin Core and Bitcoin Knots). A software monoculture is a
+        systemic risk: a critical bug in one dominant client could affect nearly the entire
+        network. The dashboard badge uses richer logic — it also flags rapid fragmentation (e.g.
+        Knots above 20%) as "Watch" — while the composite tracks only dominant-client share,
+        since the score requires a single monotonic scalar. Badge and sub-score can therefore
+        legitimately disagree at the margins.
+      </p>
+      <div class="mt-3 bg-slate-950/60 border border-slate-800 rounded-lg px-4 py-3 mono text-xs text-slate-300">
+        50% → 100 &nbsp;·&nbsp; 70% → 80 &nbsp;·&nbsp; 90% → 60 &nbsp;·&nbsp; 100% → 20
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<!-- COMPOSITE CALCULATION -->
+<section class="max-w-6xl mx-auto px-4 py-10 border-t border-slate-800">
+  <h2 class="text-lg font-semibold mb-4 text-slate-200">Composite Calculation</h2>
+  <div class="text-slate-300 space-y-4 text-sm leading-relaxed max-w-4xl">
+    <p>
+      The six indicators form three thematic pairs, weighted equally at one-third each
+      (1/6 per indicator):
+    </p>
+    <p>
+      <span class="font-semibold text-slate-100">Pair A — Economic sustainability</span> (Fee Market
+      Maturity, Security Budget): whether fees can replace the diminishing block subsidy, and whether
+      total security spend remains proportional to value at risk.
+    </p>
+    <p>
+      <span class="font-semibold text-slate-100">Pair B — Decentralization &amp; neutrality</span>
+      (Mining Decentralization, Transaction Inclusion): who can produce blocks, and whether that
+      production is being used to censor.
+    </p>
+    <p>
+      <span class="font-semibold text-slate-100">Pair C — Capture &amp; monoculture</span> (Custodial
+      Concentration, Node Software Diversity): two ways the protocol's properties can be effectively
+      bypassed even while the chain itself appears healthy.
+    </p>
+    <div class="bg-slate-900 border border-slate-800 rounded-xl px-5 py-4 mono text-xs text-slate-300 overflow-x-auto space-y-1">
+      <div>weighted = Σ ( sub-score × weight ) / Σ weights</div>
+      <div>composite = min( weighted, lowest sub-score + 25 )&nbsp;&nbsp;<span class="text-slate-500">// weakest-link cap</span></div>
+    </div>
+    <p>
+      Because integrity is a weakest-link property, the composite is capped at 25 points above the
+      lowest-scoring indicator, so strong indicators cannot mask a failing one. If an API is
+      temporarily unreachable, that indicator is excluded and the coverage line below the score
+      shows how many indicators are live. If fewer than four indicators have live data, no
+      composite score is shown.
+    </p>
+    <p>
+      Threshold calibration draws on the academic literature on Bitcoin's security economics
+      (Budish 2018, Carlsten et al. 2016, Eyal &amp; Sirer 2014, Heilman et al. 2015, among others).
+    </p>
+  </div>
+</section>
+
+<!-- CAVEATS -->
+<section class="max-w-6xl mx-auto px-4 py-10 border-t border-slate-800">
+  <h2 class="text-lg font-semibold mb-4 text-slate-200">Caveats</h2>
+  <div class="bg-amber-500/5 border border-amber-500/20 rounded-xl p-5 max-w-4xl">
+    <p class="text-sm text-slate-300 leading-relaxed">
+      Anchor values are calibrated against historical ranges and current-era network conditions,
+      and are reviewed periodically. Several indicators measure only what is publicly observable —
+      tracked treasuries, attributed pool blocks, listening nodes — and may understate the
+      underlying phenomenon. The score is an informational heuristic, not financial advice.
+    </p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="border-t border-slate-800 mt-10">
+  <div class="max-w-6xl mx-auto px-4 py-6 text-xs text-slate-500 flex flex-col sm:flex-row sm:justify-between gap-2">
+    <span>© 2026 BTC Integrity Monitor</span>
+    <span class="mono">All indicators and the composite score are computed live in-browser from public APIs.</span>
+  </div>
+</footer>
+
+</body>
+</html>
