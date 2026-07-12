@@ -1,6 +1,16 @@
 // Indicator 2: Security Budget
 // Annualized miner revenue ÷ market cap
 
+import { renderSparkline }   from '../utils/sparkline.js';
+import { fetchJSON }         from '../utils/fetch-cache.js';
+import { scoreFromAnchors }  from '../utils/normalize.js';
+import { COINGECKO_BITCOIN } from '../utils/endpoints.js';
+
+const ENDPOINTS = {
+  revenue30d: 'https://api.blockchain.info/charts/miners-revenue?timespan=30days&format=json&cors=true',
+  revenue1y:  'https://api.blockchain.info/charts/miners-revenue?timespan=1year&format=json&cors=true',
+};
+
 const STATUS = {
   HEALTHY: {
     label: 'Healthy',
@@ -22,6 +32,15 @@ const STATUS = {
   },
 };
 
+// Composite-score anchors: [annualized revenue / mcap %, score].
+// Aligned with getStatus(): Watch boundary (0.50) → 60, Healthy (0.75) → 80.
+const ANCHORS = [
+  [0,    0],
+  [0.50, 60],
+  [0.75, 80],
+  [1.5,  100],
+];
+
 function getStatus(ratioPct) {
   if (ratioPct >= 0.75) return STATUS.HEALTHY;
   if (ratioPct >= 0.50) return STATUS.WATCH;
@@ -35,79 +54,82 @@ function formatUSD(n) {
   return `$${n.toFixed(0)}`;
 }
 
-function buildSparkPaths(values, width = 200, height = 50) {
-  if (!values?.length) return { line: '', area: '' };
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = max - min || 1;
-  const step = width / (values.length - 1);
-
-  const pts = values.map((v, i) => {
-    const x = i * step;
-    const y = height - ((v - min) / range) * height;
-    return [x, y];
-  });
-
-  const line = pts.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(2)},${y.toFixed(2)}`).join(' ');
-  const area = `${line} L${width},${height} L0,${height} Z`;
-  return { line, area };
-}
-
 export async function updateSecurityBudget() {
-  // --- Fetch data ---
-  const [revenueRes, mcapRes, sparkRes] = await Promise.all([
-    fetch('https://api.blockchain.info/charts/miners-revenue?timespan=30days&format=json&cors=true'),
-    fetch('https://api.coingecko.com/api/v3/coins/bitcoin?localization=false&tickers=false&community_data=false&developer_data=false'),
-    fetch('https://api.blockchain.info/charts/miners-revenue?timespan=1year&format=json&cors=true'),
-  ]);
+  const badgeEl = document.getElementById('security-budget-badge');
 
-  if (!revenueRes.ok || !mcapRes.ok) throw new Error('Security Budget API fetch failed');
+  try {
+    // --- Fetch data (the 1-year sparkline series is optional) ---
+    const [revenueData, mcapData, sparkData] = await Promise.all([
+      fetchJSON(ENDPOINTS.revenue30d),
+      fetchJSON(COINGECKO_BITCOIN),
+      fetchJSON(ENDPOINTS.revenue1y).catch(err => {
+        console.warn('Security Budget: sparkline series unavailable:', err);
+        return null;
+      }),
+    ]);
 
-  const revenueData = await revenueRes.json();
-  const mcapData    = await mcapRes.json();
-  const sparkData   = sparkRes.ok ? await sparkRes.json() : null;
+    // --- Compute metric ---
+    const dailyRevenues = revenueData.values.map(p => p.y);
+    const avgDailyRevenue = dailyRevenues.reduce((a, b) => a + b, 0) / dailyRevenues.length;
+    const annualizedRevenue = avgDailyRevenue * 365;
+    const marketCap = mcapData.market_data.market_cap.usd;
 
-  // --- Compute metric ---
-  const dailyRevenues = revenueData.values.map(p => p.y);
-  const avgDailyRevenue = dailyRevenues.reduce((a, b) => a + b, 0) / dailyRevenues.length;
-  const annualizedRevenue = avgDailyRevenue * 365;
-  const marketCap = mcapData.market_data.market_cap.usd;
+    const ratioPct = (annualizedRevenue / marketCap) * 100;
+    const hourlyAttackCost = avgDailyRevenue / 24;
 
-  const ratioPct = (annualizedRevenue / marketCap) * 100;
-  const hourlyAttackCost = avgDailyRevenue / 24;
+    // --- Status ---
+    const status = getStatus(ratioPct);
 
-  // --- Status ---
-  const status = getStatus(ratioPct);
+    // --- Update DOM ---
+    const valueEl = document.getElementById('security-budget-value');
+    const costEl  = document.getElementById('security-budget-attack-cost');
 
-  // --- Update DOM (matching the actual IDs in index.html) ---
-  const valueEl   = document.getElementById('security-budget-value');
-  const badgeEl   = document.getElementById('security-budget-badge');
-  const costEl    = document.getElementById('security-budget-attack-cost');
-  const sparkLine = document.getElementById('security-budget-spark-line');
-  const sparkArea = document.getElementById('security-budget-spark-area');
+    if (valueEl) {
+      valueEl.textContent = `${ratioPct.toFixed(2)}%`;
+      valueEl.className = `text-3xl font-bold mono ${status.valueColor}`;
+    }
 
-  if (valueEl) {
-    valueEl.textContent = `${ratioPct.toFixed(2)}%`;
-    valueEl.className = `text-3xl font-bold mono ${status.valueColor}`;
+    if (badgeEl) {
+      badgeEl.textContent   = status.label;
+      badgeEl.className     = status.classes;
+      badgeEl.style.opacity = '1';
+    }
+
+    if (costEl) {
+      costEl.textContent = formatUSD(hourlyAttackCost);
+    }
+
+    // --- Sparkline (via the shared renderer, consistent with fee-market) ---
+    if (sparkData?.values?.length) {
+      renderSparkline({
+        lineId: 'security-budget-spark-line',
+        areaId: 'security-budget-spark-area',
+        points: sparkData.values.map(p => p.y),
+        color:  status.sparkColor,
+      });
+    }
+
+    const score = scoreFromAnchors(ratioPct, ANCHORS);
+
+    console.log(
+      `✅ Security Budget: ${ratioPct.toFixed(2)}% (${status.label}, score ${Math.round(score)}) ` +
+      `— attack cost ~${formatUSD(hourlyAttackCost)}/hr`
+    );
+
+    return {
+      key:   'securityBudget',
+      label: 'the security budget',
+      raw:   ratioPct,
+      score,
+      status: status.label,
+    };
+
+  } catch (err) {
+    console.error('⚠️ Security Budget update failed:', err);
+    if (badgeEl) {
+      badgeEl.title         = 'Live data unavailable';
+      badgeEl.style.opacity = '0.6';
+    }
+    throw err;
   }
-
-  if (badgeEl) {
-    badgeEl.textContent = status.label;
-    badgeEl.className = status.classes;
-  }
-
-  if (costEl) {
-    costEl.textContent = formatUSD(hourlyAttackCost);
-  }
-
-  if (sparkData && sparkLine && sparkArea) {
-    const values = sparkData.values.map(p => p.y);
-    const { line, area } = buildSparkPaths(values);
-    sparkLine.setAttribute('d', line);
-    sparkLine.setAttribute('stroke', status.sparkColor);
-    sparkArea.setAttribute('d', area);
-    sparkArea.setAttribute('fill', status.sparkColor);
-  }
-
-  console.log(`✅ Security Budget: ${ratioPct.toFixed(2)}% (${status.label}) — attack cost ~${formatUSD(hourlyAttackCost)}/hr`);
 }
