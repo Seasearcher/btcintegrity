@@ -57,3 +57,4 @@ rationale — are documented on the
 | [CoinGecko](https://www.coingecko.com) | Market cap, circulating supply, treasury holdings |
 | [blockchain.info](https://blockchain.info) | Miner revenue (USD) |
 | bitaccelerate.net | Node client software distribution |
+
