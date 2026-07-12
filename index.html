@@ -9,7 +9,7 @@
   body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
   .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
   .spark-path { fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
-  .spark-area { opacity: 0.15; }
+  /* Area opacity is set via fill-opacity in sparkline.js */
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 </head>
@@ -36,17 +36,17 @@
       <div>
         <p class="text-xs uppercase tracking-widest text-slate-400 mb-2">Composite Integrity Score</p>
         <div class="flex items-baseline gap-3">
-          <span class="text-6xl font-bold text-amber-400">71</span>
+          <span id="composite-score" class="text-6xl font-bold text-slate-500">—</span>
           <span class="text-2xl text-slate-500 mono">/ 100</span>
         </div>
-        <p class="text-slate-300 mt-3 max-w-md">
-          Network integrity is currently <span class="text-amber-400 font-semibold">moderate</span>.
-          Fee-market maturity and custodial concentration are the main downward pressures.
+        <p id="composite-narrative" class="text-slate-300 mt-3 max-w-md">
+          Calculating live score from six indicators…
         </p>
+        <p id="composite-coverage" class="text-xs text-slate-500 mt-2 mono"></p>
       </div>
       <div class="w-full md:w-64">
         <div class="h-3 bg-slate-800 rounded-full overflow-hidden">
-          <div class="h-full bg-gradient-to-r from-rose-500 via-amber-400 to-emerald-400" style="width: 71%"></div>
+          <div id="composite-bar" class="h-full bg-gradient-to-r from-rose-500 via-amber-400 to-emerald-400 transition-all duration-700" style="width: 0%"></div>
         </div>
         <div class="flex justify-between text-xs text-slate-500 mt-2 mono">
           <span>0 — Critical</span>
@@ -77,7 +77,7 @@
       <p class="text-xs text-slate-500 mt-1">Fees as share of total block reward in BTC (90d avg)</p>
 
       <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
-        <path id="fee-market-spark-area" class="spark-area" fill="#94a3b8" d=""></path>
+        <path id="fee-market-spark-area" class="spark-area" fill="#94a3b8" fill-opacity="0.15" d=""></path>
         <path id="fee-market-spark-line" class="spark-path" stroke="#94a3b8" d=""></path>
       </svg>
 
@@ -101,7 +101,7 @@
       <p class="text-xs text-slate-500 mt-1">Annualized miner revenue ÷ market cap</p>
 
       <svg viewBox="0 0 200 50" class="w-full h-12 mt-3" preserveAspectRatio="none">
-        <path id="security-budget-spark-area" class="spark-area" fill="#94a3b8" d=""></path>
+        <path id="security-budget-spark-area" class="spark-area" fill="#94a3b8" fill-opacity="0.15" d=""></path>
         <path id="security-budget-spark-line" class="spark-path" stroke="#94a3b8" d=""></path>
       </svg>
 
@@ -154,6 +154,8 @@
         <span id="transaction-inclusion-predictable" class="mono">—</span> were mined by pools whose
         block contents closely matched the public mempool. Lower match rates can indicate
         transaction filtering, private fee deals, or alternative inclusion policies.
+        Blocks from unidentified pools are excluded from the match-rate average —
+        precisely the blocks most likely to deviate, so treat this as an optimistic bound.
       </p>
     </article>
 
@@ -216,7 +218,7 @@
   <h2 class="text-lg font-semibold mb-4 text-slate-200">Methodology</h2>
   <div class="text-slate-300 space-y-4 text-sm leading-relaxed max-w-4xl">
     <p>
-      The Composite Integrity Score is a weighted average of all six indicators, each normalized to a 0–100 scale against historical baselines and thresholds drawn from peer-reviewed literature (Budish 2018, Carlsten et al. 2016, Eyal &amp; Sirer 2014, Heilman et al. 2015, among others).
+      The Composite Integrity Score is a weighted mean of the six indicators, each normalized to a 0–100 scale by piecewise-linear interpolation between fixed anchor values published in the calculation code. Anchors align with the Healthy / Watch / Concern thresholds shown on each card: the Watch boundary maps to 60 and the Healthy boundary to 80. The three indicator pairs below are weighted equally (one-third each). Because integrity is a weakest-link property, the composite is capped at 25 points above the lowest-scoring indicator, so strong indicators cannot mask a failing one. If fewer than four indicators have live data, no score is shown. Threshold calibration draws on the academic literature on Bitcoin's security economics (Budish 2018, Carlsten et al. 2016, Eyal &amp; Sirer 2014, Heilman et al. 2015, among others).
     </p>
     <p>
       <span class="font-semibold text-slate-100">Indicators 1 &amp; 2</span> measure the economic sustainability of proof-of-work: whether fees can replace the diminishing block subsidy, and whether total security spend remains proportional to value at risk.
@@ -245,7 +247,7 @@
 <footer class="border-t border-slate-800 mt-10">
   <div class="max-w-6xl mx-auto px-4 py-6 text-xs text-slate-500 flex flex-col sm:flex-row sm:justify-between gap-2">
     <span>© 2026 BTC Integrity Monitor</span>
-    <span class="mono">Prototype - Composite integrity score not live yet. All other indicators live.</span>
+    <span class="mono">All indicators and the composite score are computed live in-browser from public APIs.</span>
   </div>
 </footer>
 
