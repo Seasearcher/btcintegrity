@@ -10,10 +10,12 @@
 // concentration. Exchange custody alone is estimated to add another
 // 15-20% based on external research.
 
-const ENDPOINTS = {
-  treasuries: 'https://api.coingecko.com/api/v3/companies/public_treasury/bitcoin',
-  bitcoin:    'https://api.coingecko.com/api/v3/coins/bitcoin?localization=false&tickers=false&community_data=false&developer_data=false',
-};
+import { fetchJSON }         from '../utils/fetch-cache.js';
+import { scoreFromAnchors }  from '../utils/normalize.js';
+import { COINGECKO_BITCOIN } from '../utils/endpoints.js';
+
+const TREASURIES_ENDPOINT =
+  'https://api.coingecko.com/api/v3/companies/public_treasury/bitcoin';
 
 // Thresholds for "% of circulating supply held by tracked treasuries & funds".
 // Calibrated for this subset only; true custodial concentration is higher.
@@ -22,6 +24,15 @@ const THRESHOLDS = {
   watch:   10,   // 5-10%  = moderate, growing concentration
   // >= 10%       = high concentration via tracked institutions alone
 };
+
+// Composite-score anchors: [% of supply, score]. Lower is better.
+// Aligned with THRESHOLDS: Healthy boundary (5) → 80, Watch boundary (10) → 60.
+const ANCHORS = [
+  [2,  100],
+  [5,  80],   // = THRESHOLDS.healthy
+  [10, 60],   // = THRESHOLDS.watch
+  [25, 0],
+];
 
 const STATUS_STYLES = {
   Healthy: {
@@ -54,17 +65,10 @@ export async function updateCustodialConcentration() {
   }
 
   try {
-    const [treasuriesRes, bitcoinRes] = await Promise.all([
-      fetch(ENDPOINTS.treasuries),
-      fetch(ENDPOINTS.bitcoin),
+    const [treasuriesData, bitcoinData] = await Promise.all([
+      fetchJSON(TREASURIES_ENDPOINT),
+      fetchJSON(COINGECKO_BITCOIN),
     ]);
-
-    if (!treasuriesRes.ok || !bitcoinRes.ok) {
-      throw new Error('CoinGecko API returned non-OK status');
-    }
-
-    const treasuriesData = await treasuriesRes.json();
-    const bitcoinData    = await bitcoinRes.json();
 
     const totalHoldings     = treasuriesData.total_holdings;
     const circulatingSupply = bitcoinData.market_data.circulating_supply;
@@ -107,11 +111,21 @@ export async function updateCustodialConcentration() {
         `Supply held by tracked treasuries & funds (${companies.length} entities)`;
     }
 
+    const score = scoreFromAnchors(pctOfSupply, ANCHORS);
+
     console.log(
-      `✅ Custodial Concentration: ${pctOfSupply.toFixed(2)}% (${status}) — ` +
+      `✅ Custodial Concentration: ${pctOfSupply.toFixed(2)}% (${status}, score ${Math.round(score)}) — ` +
       `${totalHoldings.toLocaleString()} BTC across ${companies.length} entities, ` +
       `top-10: ${top10Pct.toFixed(2)}%`
     );
+
+    return {
+      key:   'custodialConcentration',
+      label: 'custodial concentration',
+      raw:   pctOfSupply,
+      score,
+      status,
+    };
 
   } catch (err) {
     console.error('⚠️ Custodial Concentration update failed:', err);
