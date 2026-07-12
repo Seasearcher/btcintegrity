@@ -2,6 +2,10 @@
 // Source: mempool.space pool match-rate data (1w window)
 // Measures: weighted avg of how closely pool blocks match expected templates
 
+import { fetchJSON }        from '../utils/fetch-cache.js';
+import { scoreFromAnchors } from '../utils/normalize.js';
+import { MEMPOOL_POOLS_1W } from '../utils/endpoints.js';
+
 const STATUS = {
   HEALTHY: {
     label: 'Healthy',
@@ -23,6 +27,15 @@ const STATUS = {
   },
 };
 
+// Composite-score anchors: [weighted match rate %, score].
+// Aligned with getStatus(): Watch boundary (95) → 60, Healthy (98) → 80.
+const ANCHORS = [
+  [90,   0],
+  [95,   60],
+  [98,   80],
+  [99.5, 100],
+];
+
 function getStatus(matchRate) {
   if (matchRate >= 98) return STATUS.HEALTHY;
   if (matchRate >= 95) return STATUS.WATCH;
@@ -30,10 +43,11 @@ function getStatus(matchRate) {
 }
 
 export async function updateTransactionInclusion() {
+  const valueEl = document.getElementById('transaction-inclusion-value');
+  const badge   = document.getElementById('transaction-inclusion-badge');
+
   try {
-    const res = await fetch('https://mempool.space/api/v1/mining/pools/1w');
-    if (!res.ok) throw new Error('mempool.space API error: ' + res.status);
-    const data = await res.json();
+    const data = await fetchJSON(MEMPOOL_POOLS_1W);
 
     const pools = data.pools || [];
     if (pools.length === 0) throw new Error('No pool data returned');
@@ -52,6 +66,8 @@ export async function updateTransactionInclusion() {
       if (p.avgMatchRate >= 95) predictableBlocks += p.blockCount;
     });
 
+    if (trackedBlocks === 0) throw new Error('No attributed pool blocks in window');
+
     const matchRate = weightedSum / trackedBlocks;
     const predictableShare = (predictableBlocks / trackedBlocks) * 100;
 
@@ -59,31 +75,49 @@ export async function updateTransactionInclusion() {
     const status = getStatus(matchRate);
 
     // --- 3. Update DOM ---
-    const valueEl = document.getElementById('transaction-inclusion-value');
-    valueEl.textContent = matchRate.toFixed(2) + '%';
-    valueEl.className = 'text-3xl font-bold mono ' + status.valueColor;
+    if (valueEl) {
+      valueEl.textContent = matchRate.toFixed(2) + '%';
+      valueEl.className = 'text-3xl font-bold mono ' + status.valueColor;
+    }
 
-    const badge = document.getElementById('transaction-inclusion-badge');
-    badge.textContent = status.label;
-    badge.className = status.classes;
+    if (badge) {
+      badge.textContent = status.label;
+      badge.className = status.classes;
+      badge.style.opacity = '1';
+    }
 
-    document.getElementById('transaction-inclusion-blocks').textContent =
-      totalBlocks.toLocaleString();
-    document.getElementById('transaction-inclusion-predictable').textContent =
-      predictableShare.toFixed(1) + '%';
+    const blocksEl = document.getElementById('transaction-inclusion-blocks');
+    if (blocksEl) blocksEl.textContent = totalBlocks.toLocaleString();
+
+    const predictableEl = document.getElementById('transaction-inclusion-predictable');
+    if (predictableEl) predictableEl.textContent = predictableShare.toFixed(1) + '%';
 
     // --- 4. Render per-pool bars ---
     drawPoolBars(pools.filter(p => p.slug !== 'unknown'));
 
+    const score = scoreFromAnchors(matchRate, ANCHORS);
+
     console.log(
-      `✅ Transaction Inclusion: ${matchRate.toFixed(2)}% (${status.label}) ` +
+      `✅ Transaction Inclusion: ${matchRate.toFixed(2)}% (${status.label}, score ${Math.round(score)}) ` +
       `— ${trackedBlocks} tracked blocks, ${predictableShare.toFixed(1)}% predictable`
     );
 
+    return {
+      key:   'transactionInclusion',
+      label: 'transaction inclusion',
+      raw:   matchRate,
+      score,
+      status: status.label,
+    };
+
   } catch (err) {
     console.error('⚠️ Transaction Inclusion indicator failed:', err);
-    const v = document.getElementById('transaction-inclusion-value');
-    if (v) v.textContent = '—';
+    if (valueEl) valueEl.textContent = '—';
+    if (badge) {
+      badge.title         = 'Live data unavailable';
+      badge.style.opacity = '0.6';
+    }
+    throw err; // re-throw so main.js and the composite see the failure
   }
 }
 

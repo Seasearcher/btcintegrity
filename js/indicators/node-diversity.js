@@ -1,5 +1,23 @@
-// node-diversity.js
+// Indicator 6: Node Software Diversity
+// Source: bitaccelerate.net client snapshot
+
+import { fetchJSON }        from '../utils/fetch-cache.js';
+import { scoreFromAnchors } from '../utils/normalize.js';
+
 const ENDPOINT = 'https://bitaccelerate.net/api/nodes-clients.json';
+
+// Composite-score anchors: [dominant client share %, score]. Lower is better.
+//
+// NOTE: the badge below uses richer editorial logic (it also flags rapid
+// fragmentation, e.g. Knots > 20%, as "Watch"). For the composite we need a
+// monotonic scalar, so the score tracks only dominant-client share:
+// monoculture risk. The two can legitimately disagree at the margins.
+const DOMINANT_ANCHORS = [
+  [50,  100],
+  [70,  80],
+  [90,  60],   // badge "Concentrated" boundary
+  [100, 20],
+];
 
 export async function updateNodeDiversity() {
   const valueEl    = document.getElementById('node-diversity-value');
@@ -10,9 +28,7 @@ export async function updateNodeDiversity() {
   const barOther   = document.getElementById('node-diversity-bar-other');
 
   try {
-    const res = await fetch(ENDPOINT);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const json = await res.json();
+    const json = await fetchJSON(ENDPOINT);
 
     const { labels, data, meta } = json;
     if (!Array.isArray(labels) || !Array.isArray(data) || labels.length !== data.length) {
@@ -32,24 +48,27 @@ export async function updateNodeDiversity() {
     const knotsPct = pct(knots);
     const otherPct = pct(other);
 
-    barCore.style.width  = corePct.toFixed(2)  + '%';
-    barKnots.style.width = knotsPct.toFixed(2) + '%';
-    barOther.style.width = otherPct.toFixed(2) + '%';
+    if (barCore)  barCore.style.width  = corePct.toFixed(2)  + '%';
+    if (barKnots) barKnots.style.width = knotsPct.toFixed(2) + '%';
+    if (barOther) barOther.style.width = otherPct.toFixed(2) + '%';
 
-valueEl.innerHTML =
-  `<span class="text-orange-400">${corePct.toFixed(1)}%</span>` +
-  `<span class="text-slate-500 mx-1">/</span>` +
-  `<span class="text-purple-400">${knotsPct.toFixed(1)}%</span>` +
-  `<span class="text-slate-500 mx-1">/</span>` +
-  `<span class="text-slate-400">${otherPct.toFixed(1)}%</span>`;
-
+    if (valueEl) {
+      valueEl.innerHTML =
+        `<span class="text-orange-400">${corePct.toFixed(1)}%</span>` +
+        `<span class="text-slate-500 mx-1">/</span>` +
+        `<span class="text-purple-400">${knotsPct.toFixed(1)}%</span>` +
+        `<span class="text-slate-500 mx-1">/</span>` +
+        `<span class="text-slate-400">${otherPct.toFixed(1)}%</span>`;
+    }
 
     const ageHrs = meta?.timestamp
       ? ((Date.now() / 1000 - meta.timestamp) / 3600).toFixed(1)
       : null;
-    subtitleEl.textContent =
-      `${total.toLocaleString()} listening nodes` +
-      (ageHrs ? ` · updated ${ageHrs}h ago` : '');
+    if (subtitleEl) {
+      subtitleEl.textContent =
+        `${total.toLocaleString()} listening nodes` +
+        (ageHrs ? ` · updated ${ageHrs}h ago` : '');
+    }
 
     let badgeText, badgeClass;
     if (corePct > 90 || knotsPct > 90) {
@@ -62,17 +81,34 @@ valueEl.innerHTML =
       badgeText = 'Healthy';
       badgeClass = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
     }
-    badgeEl.textContent = badgeText;
-    badgeEl.className = 'text-xs px-2 py-1 rounded border ' + badgeClass;
+    if (badgeEl) {
+      badgeEl.textContent = badgeText;
+      badgeEl.className = 'text-xs px-2 py-1 rounded border ' + badgeClass;
+    }
+
+    // --- Composite score: dominant-client share (monoculture risk) ---
+    const dominantShare = Math.max(corePct, knotsPct);
+    const score = scoreFromAnchors(dominantShare, DOMINANT_ANCHORS);
 
     console.log(
       `✅ Node Software Diversity: Core ${corePct.toFixed(1)}% / ` +
-      `Knots ${knotsPct.toFixed(1)}% / Other ${otherPct.toFixed(1)}% — ${badgeText}`
+      `Knots ${knotsPct.toFixed(1)}% / Other ${otherPct.toFixed(1)}% — ${badgeText}, ` +
+      `dominant ${dominantShare.toFixed(1)}%, score ${Math.round(score)}`
     );
+
+    return {
+      key:   'nodeDiversity',
+      label: 'node software diversity',
+      raw:   dominantShare,
+      score,
+      status: badgeText,
+    };
+
   } catch (err) {
     console.error('Node Software Diversity indicator failed:', err);
-    valueEl.textContent    = '—';
-    subtitleEl.textContent = 'Data source unavailable';
-    badgeEl.textContent    = '—';
+    if (valueEl)    valueEl.textContent    = '—';
+    if (subtitleEl) subtitleEl.textContent = 'Data source unavailable';
+    if (badgeEl)    badgeEl.textContent    = '—';
+    throw err; // re-throw so main.js and the composite see the failure
   }
 }
